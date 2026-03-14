@@ -3,348 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MedCommand Pro</title>
+    <title>Medical Command | Timer Controls</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            -webkit-tap-highlight-color: transparent;
-            background-color: #0f172a; 
-        }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        input, select { font-size: 16px !important; }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        .glass-panel { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .triage-border-Red { border-left: 6px solid #ef4444; }
+        .triage-border-Yellow { border-left: 6px solid #eab308; }
+        .triage-border-Green { border-left: 6px solid #22c55e; }
+        .triage-border-Black { border-left: 6px solid #4b5563; }
+        
+        @keyframes pulse-red {
+            0% { color: #ef4444; }
+            50% { color: #fca5a5; }
+            100% { color: #ef4444; }
         }
-        .fab-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
-        .force-desktop { min-width: 1100px !important; flex-direction: row !important; }
+        .timer-critical { animation: pulse-red 1s infinite; font-weight: 800; }
+        select { appearance: none; }
     </style>
 </head>
-<body class="h-full text-slate-200 overflow-hidden flex flex-col" id="body-tag">
+<body class="h-full bg-gray-950 text-gray-100 flex flex-col overflow-hidden">
 
-    <header class="bg-slate-900/80 border-b border-slate-800 px-4 py-3 sticky top-0 z-40 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-lg font-extrabold tracking-tight text-white uppercase flex items-center gap-2">
-                    <span class="bg-red-600 p-1 rounded text-xs">MED</span> Command
-                </h1>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest" id="header-incident-info">No Active Incident</p>
-            </div>
+    <div id="modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="bg-gray-800 rounded-2xl border border-gray-600 w-full max-w-md p-6 shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white italic">
+                🚑 Depart / Transport
+            </h3>
             
-            <div class="flex gap-2">
-                <button onclick="toggleLayout()" title="Toggle Desktop/Mobile View" class="p-2 bg-slate-800 rounded-full border border-slate-700 hover:bg-slate-700 transition-all">
-                    <svg id="view-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                </button>
-                <button onclick="exportToCSV()" class="p-2 bg-emerald-600/20 text-emerald-400 rounded-full border border-emerald-500/30 hover:bg-emerald-600/30 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main id="main-container" class="flex-1 overflow-y-auto custom-scroll p-4 gap-4 flex flex-col transition-all duration-300">
-        
-        <section id="stats-grid" class="grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0">
-            <div class="glass-card p-3 rounded-2xl border-l-4 border-blue-500">
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Total Patients</p>
-                <p class="text-2xl font-black text-white" id="total-patients">0</p>
-            </div>
-            <div class="glass-card p-3 rounded-2xl border-l-4 border-red-500">
-                <p class="text-[10px] font-bold text-red-400 uppercase">Red (Imm)</p>
-                <p class="text-2xl font-black text-white" id="total-red">0</p>
-            </div>
-            <div class="glass-card p-3 rounded-2xl border-l-4 border-yellow-500">
-                <p class="text-[10px] font-bold text-yellow-400 uppercase">Yellow (Del)</p>
-                <p class="text-2xl font-black text-white" id="total-yellow">0</p>
-            </div>
-            <div class="glass-card p-3 rounded-2xl border-l-4 border-emerald-500">
-                <p class="text-[10px] font-bold text-emerald-400 uppercase">Green (Min)</p>
-                <p class="text-2xl font-black text-white" id="total-green">0</p>
-            </div>
-            <div class="glass-card p-3 rounded-2xl">
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Refusals</p>
-                <p class="text-2xl font-black text-slate-400" id="total-refusals">0</p>
-            </div>
-            <div class="glass-card p-3 rounded-2xl">
-                <p class="text-[10px] font-bold text-slate-500 uppercase">Departed</p>
-                <p class="text-2xl font-black text-white" id="total-units">0</p>
-            </div>
-        </section>
-
-        <div class="flex flex-col lg:flex-row gap-4 flex-1">
-            
-            <div id="col-1" class="flex flex-col gap-4 w-full lg:w-1/2">
-                <section class="glass-card rounded-2xl p-4">
-                    <button onclick="toggleSection('incident-form')" class="w-full flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Incident Details</span>
-                        <svg id="arrow-incident" class="transition-transform" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div id="incident-form" class="hidden mt-4 grid grid-cols-2 gap-3">
-                        <input type="text" id="incident-address" oninput="updateHeader()" placeholder="Address" class="col-span-2 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
-                        <input type="text" id="incident-number" oninput="updateHeader()" placeholder="Incident #" class="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
-                        <input type="text" id="incident-channel" placeholder="Radio" class="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
-                    </div>
-                </section>
-
-                <section class="flex-1 flex flex-col min-h-[300px]">
-                    <div class="flex justify-between items-center mb-3 px-1">
-                        <h2 class="text-xs font-bold text-orange-400 uppercase tracking-widest">On Scene Units</h2>
-                        <span class="bg-orange-400/10 text-orange-400 text-[10px] px-2 py-1 rounded-full font-bold" id="active-count">0</span>
-                    </div>
-                    <div id="active-list" class="space-y-3">
-                        <div class="text-center py-10 glass-card rounded-2xl border-dashed border-slate-700 text-slate-500 text-sm">No units assigned.</div>
-                    </div>
-                </section>
-            </div>
-
-            <div id="col-2" class="flex flex-col w-full lg:w-1/2">
-                <div class="flex justify-between items-center mb-3 px-1">
-                    <h2 class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Transport Log</h2>
-                    <span class="bg-emerald-400/10 text-emerald-400 text-[10px] px-2 py-1 rounded-full font-bold" id="log-count">0</span>
-                </div>
-                <div id="transport-log" class="space-y-2 pb-24">
-                    <div class="text-center py-10 glass-card rounded-2xl border-dashed border-slate-700 text-slate-500 text-sm">No transports yet.</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <button onclick="toggleModal('entry-modal')" class="fixed bottom-6 right-6 w-14 h-14 bg-orange-600 rounded-full flex items-center justify-center fab-shadow active:scale-90 transition-transform z-40">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-    </button>
-
-    <div id="entry-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-        <div class="bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 border-t sm:border border-slate-800 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-white italic uppercase tracking-tighter">Assign to Unit</h3>
-                <button onclick="toggleModal('entry-modal')" class="text-slate-500">✕</button>
-            </div>
-            <form id="entry-form" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Unit Type</label>
-                        <select id="unit-type" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+            <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700 mb-4">
+                <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-2">Transporting Unit Details</p>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block text-xs text-gray-500 mb-1">Type</label>
+                        <select id="modal-transport-unit-type" class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-2 text-white text-sm">
                             <option value="Rescue">Rescue</option>
                             <option value="Engine">Engine</option>
                             <option value="Truck">Truck</option>
                             <option value="Squad">Squad</option>
+                            <option value="DC">DC</option>
+                            <option value="LR">LR</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Identifier</label>
-                        <input type="text" id="unit-id" placeholder="R-12" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none font-bold uppercase" required>
+                    <div class="col-span-2">
+                        <label class="block text-xs text-gray-500 mb-1">Unit ID</label>
+                        <input type="text" id="modal-transport-unit-id" class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white font-bold uppercase text-sm">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Patients</label>
-                        <input type="number" id="patient-count" value="1" min="1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Triage</label>
-                        <select id="triage-cat" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none font-bold">
-                            <option value="Red" class="text-red-500">RED</option>
-                            <option value="Yellow" class="text-yellow-500">YELLOW</option>
-                            <option value="Green" class="text-emerald-500">GREEN</option>
-                            <option value="Black" class="text-slate-400">BLACK</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-lg uppercase italic mt-4">Add to Scene</button>
-            </form>
-        </div>
-    </div>
+            </div>
+            
+            <div class="mb-4 bg-gray-700/30 p-3 rounded-lg border border-gray-600 flex items-center gap-3">
+                <input type="checkbox" id="modal-refusal" class="w-6 h-6 text-blue-600 rounded bg-gray-800 border-gray-500">
+                <label for="modal-refusal" class="text-sm font-bold text-white cursor-pointer select-none">Patient Refusal (No Transport)</label>
+            </div>
 
-    <div id="transport-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-        <div class="bg-slate-900 w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 border-t sm:border border-slate-800 shadow-2xl">
-            <h3 class="text-xl font-black text-white italic uppercase mb-6 flex items-center gap-3">Depart Incident</h3>
-            <div class="space-y-4">
-                <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
-                    <div class="flex items-center gap-3 mb-4">
-                        <input type="checkbox" id="modal-refusal" class="w-6 h-6 rounded-lg bg-slate-700 border-slate-600 text-blue-600">
-                        <label for="modal-refusal" class="text-sm font-bold text-white">Patient Refusal</label>
-                    </div>
-                    <select id="modal-destination" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
-                        <option value="">-- Select Hospital --</option>
-                    </select>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="toggleModal('transport-modal')" class="flex-1 bg-slate-800 text-slate-400 font-bold py-4 rounded-2xl">Cancel</button>
-                    <button onclick="confirmTransport()" class="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl uppercase italic">Confirm</button>
-                </div>
+            <div class="mb-6">
+                <label class="block text-xs text-gray-400 mb-1">Destination Hospital</label>
+                <select id="modal-destination" class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white text-base">
+                </select>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 rounded-xl transition-colors">Cancel</button>
+                <button id="modal-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow transition-colors">Confirm</button>
             </div>
         </div>
     </div>
 
+    <header class="bg-gray-900 border-b border-gray-800 p-2 lg:p-3">
+        <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row gap-3 items-center">
+            <div class="flex items-center gap-4 shrink-0">
+                <h1 class="text-lg font-black tracking-tighter uppercase italic text-red-500">Med-Command</h1>
+                <div class="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded border border-gray-700">
+                    <div>
+                        <span class="text-[9px] text-gray-500 block leading-none">INCIDENT TIME</span>
+                        <span id="global-timer" class="text-sm font-mono font-bold text-white leading-none">00:00:00</span>
+                    </div>
+                    <div class="flex gap-1 border-l border-gray-700 ml-2 pl-2">
+                        <button onclick="startIncidentTimer()" class="text-xs hover:text-green-500">▶️</button>
+                        <button onclick="stopIncidentTimer()" class="text-xs hover:text-yellow-500">⏸️</button>
+                        <button onclick="resetIncidentTimer()" class="text-xs hover:text-red-500">🔄</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-2">
+                <input type="text" id="incident-address" placeholder="Address" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
+                <input type="text" id="incident-number" placeholder="Inc #" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
+                <input type="text" id="incident-channel" placeholder="Radio" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
+                <input type="text" id="med-officer" placeholder="Med Officer" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
+            </div>
+        </div>
+    </header>
+
+    <div class="bg-gray-900/50 border-b border-gray-800 overflow-x-auto">
+        <div class="flex p-2 gap-2 min-w-max md:justify-around max-w-[1600px] mx-auto text-center">
+            <div class="px-6"><div class="text-[10px] text-gray-500 uppercase">Pts</div><div class="font-bold text-blue-400" id="total-patients">0</div></div>
+            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-red-500 uppercase">Red</div><div class="font-bold text-red-500" id="total-red">0</div></div>
+            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-yellow-500 uppercase">Yel</div><div class="font-bold text-yellow-500" id="total-yellow">0</div></div>
+            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-green-500 uppercase">Grn</div><div class="font-bold text-green-500" id="total-green">0</div></div>
+            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-gray-400 uppercase">Blk</div><div class="font-bold text-gray-400" id="total-black">0</div></div>
+            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-gray-500 uppercase">Ref</div><div class="font-bold text-gray-300" id="total-refusals">0</div></div>
+        </div>
+    </div>
+
+    <main class="flex-1 overflow-hidden flex flex-col md:flex-row p-2 lg:p-4 gap-4">
+        <div class="flex-1 flex flex-col gap-4 overflow-hidden">
+            <section class="glass-panel rounded-2xl p-4">
+                <form id="entry-form" class="grid grid-cols-12 gap-3">
+                    <div class="col-span-4 md:col-span-2">
+                        <select id="unit-type" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm">
+                            <option value="Rescue">Rescue</option><option value="Engine">Engine</option><option value="Truck">Truck</option><option value="Squad">Squad</option>
+                        </select>
+                    </div>
+                    <div class="col-span-8 md:col-span-3">
+                        <input type="text" id="unit-id" placeholder="Unit ID" required class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 font-bold uppercase">
+                    </div>
+                    <div class="col-span-4 md:col-span-2">
+                        <input type="number" id="patient-count" value="1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center font-bold">
+                    </div>
+                    <div class="col-span-8 md:col-span-3">
+                        <select id="triage-cat" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 font-bold text-orange-400">
+                            <option value="Red">RED</option><option value="Yellow">YELLOW</option><option value="Green">GREEN</option><option value="Black">BLACK</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="col-span-12 md:col-span-2 bg-orange-600 font-black py-3 rounded-lg active:scale-95 transition-transform">ASSIGN</button>
+                </form>
+            </section>
+
+            <section class="flex-1 glass-panel rounded-2xl flex flex-col overflow-hidden">
+                <div class="p-3 border-b border-gray-800 bg-gray-900/40">
+                    <h2 class="font-bold text-orange-400 text-xs tracking-widest uppercase">Active Scene</h2>
+                </div>
+                <div id="active-list" class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll"></div>
+            </section>
+        </div>
+
+        <section class="w-full md:w-96 glass-panel rounded-2xl flex flex-col overflow-hidden">
+            <div class="p-3 border-b border-gray-800 bg-gray-900/40 flex justify-between">
+                <h2 class="font-bold text-green-500 text-xs tracking-widest uppercase">Transport Log</h2>
+                <button onclick="exportToCSV()" class="text-[10px] text-blue-400 font-bold uppercase">Export CSV</button>
+            </div>
+            <div id="transport-log" class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll bg-black/10"></div>
+        </section>
+    </main>
+
     <script>
         const hospitalList = ["All Children's Hospital", "Bayfront Health of St Petersburg", "HCA FL Bayonet Point Hospital", "HCA FL Blake Hospital - Manatee", "Sarasota Memorial - Sarasota", "St. Joseph's Hosp - Hillsborough", "Tampa General Hosp- Hillsborough", "AdventHealth of North Pinellas", "AdventHealth Palm Harbor ER", "Bardmoor Emergency Center", "Bay Pines VA Hospital", "Bayfront Health ER - Crossroads", "Bayfront Health ER - Pinellas Park", "Eleos (PEHMS)", "HCA FL Clearwater Emergency", "HCA FL Lake Tarpon Emergency", "HCA FL Largo Hospital", "HCA FL Largo West Hospital", "HCA FL Northside Hospital", "HCA FL Pasadena Hospital", "HCA FL St. Petersburg Hospital", "HCA FL Trinity Hospital", "HCA FL West Tampa Hospital", "Mease Countryside Hospital", "Mease Dunedin Hospital", "Morton Plant Hospital", "St. Anthony's Hospital", "St. Joseph's Hospital - Tampa", "Tampa General Hospital - Tampa"];
+
         let activeUnits = [];
         let transportHistory = [];
         let currentTransportId = null;
+        
+        // Timer Logic
+        let incidentTimer = null;
+        let globalSeconds = 0;
+        let isTimerRunning = false;
 
-        // Initialize Hospitals
-        document.getElementById('modal-destination').innerHTML = '<option value="">-- Select Hospital --</option>' + 
-            hospitalList.map(h => `<option value="${h}">${h}</option>`).join('');
+        (function() {
+            const destSelect = document.getElementById('modal-destination');
+            destSelect.innerHTML = '<option value="">-- Select Hospital --</option>' + 
+                hospitalList.map(h => `<option value="${h}">${h}</option>`).join('');
+            
+            setInterval(updateUnitTimers, 1000);
+            document.getElementById('modal-confirm-btn').addEventListener('click', confirmTransport);
+        })();
 
-        function toggleModal(id) { 
-            document.getElementById(id).classList.toggle('hidden'); 
-            if(id === 'entry-modal' && !document.getElementById(id).classList.contains('hidden')) {
-                document.getElementById('unit-id').focus();
+        // GLOBAL TIMER FUNCTIONS
+        function startIncidentTimer() {
+            if (isTimerRunning) return;
+            isTimerRunning = true;
+            incidentTimer = setInterval(() => {
+                globalSeconds++;
+                updateGlobalDisplay();
+            }, 1000);
+        }
+
+        function stopIncidentTimer() {
+            isTimerRunning = false;
+            clearInterval(incidentTimer);
+        }
+
+        function resetIncidentTimer() {
+            if (confirm("Reset Global Incident Timer?")) {
+                stopIncidentTimer();
+                globalSeconds = 0;
+                updateGlobalDisplay();
             }
         }
-        
-        function toggleSection(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function updateHeader() {
-            const addr = document.getElementById('incident-address').value;
-            const num = document.getElementById('incident-number').value;
-            document.getElementById('header-incident-info').innerText = `${num || 'Active'} | ${addr || 'Scene'}`;
+
+        function updateGlobalDisplay() {
+            const h = Math.floor(globalSeconds / 3600);
+            const m = Math.floor((globalSeconds % 3600) / 60);
+            const s = globalSeconds % 60;
+            document.getElementById('global-timer').innerText = 
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        // --- Logic Fixes ---
+        function updateUnitTimers() {
+            const now = Date.now();
+            activeUnits.forEach(u => {
+                const elapsedSec = Math.floor((now - u.assignedTimestamp) / 1000);
+                const min = Math.floor(elapsedSec / 60);
+                const sec = elapsedSec % 60;
+                const timerStr = `${min}:${sec.toString().padStart(2, '0')}`;
+                
+                const timerEl = document.getElementById(`timer-${u.id}`);
+                if (timerEl) {
+                    timerEl.innerText = timerStr;
+                    if (min >= 20) timerEl.className = "timer-critical";
+                    else if (min >= 15) timerEl.className = "text-yellow-500 font-bold";
+                    else timerEl.className = "text-gray-400 text-xs font-mono";
+                }
+            });
+        }
+
+        function updateTriage(listType, id, newTriage) {
+            const list = listType === 'active' ? activeUnits : transportHistory;
+            const item = list.find(u => u.id === id);
+            if (item) {
+                item.triageCategory = newTriage;
+                renderAll();
+            }
+        }
+
+        function returnToScene(id) {
+            const idx = transportHistory.findIndex(u => u.id === id);
+            if (idx !== -1) {
+                const unit = transportHistory.splice(idx, 1)[0];
+                unit.destination = null;
+                unit.transportTime = null;
+                activeUnits.push(unit);
+                renderAll();
+            }
+        }
+
         document.getElementById('entry-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const unit = {
+            // Start Global Timer on first assignment
+            if (!isTimerRunning && globalSeconds === 0) startIncidentTimer();
+
+            activeUnits.push({
                 id: Date.now(),
-                assignedTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                assignedTimestamp: Date.now(),
                 unitType: document.getElementById('unit-type').value,
                 unitId: document.getElementById('unit-id').value.toUpperCase(),
                 patientCount: parseInt(document.getElementById('patient-count').value) || 0,
                 triageCategory: document.getElementById('triage-cat').value,
-                destination: null, transportTime: null
-            };
-            activeUnits.push(unit);
-            renderActive();
-            updateTotals();
-            toggleModal('entry-modal');
-            e.target.reset();
+                destination: null,
+                transportTime: null
+            });
+            document.getElementById('unit-id').value = '';
+            renderAll();
         });
 
-        document.getElementById('modal-refusal').addEventListener('change', (e) => {
-            document.getElementById('modal-destination').disabled = e.target.checked;
-            if (e.target.checked) document.getElementById('modal-destination').value = "";
-        });
-
-        function renderActive() {
-            const list = document.getElementById('active-list');
-            list.innerHTML = activeUnits.length === 0 ? '<div class="text-center py-10 glass-card rounded-2xl border-dashed border-slate-700 text-slate-500 text-sm">No units assigned.</div>' : '';
+        function renderAll() {
+            const activeListEl = document.getElementById('active-list');
+            activeListEl.innerHTML = activeUnits.length === 0 ? '<div class="text-center text-gray-600 py-8 italic text-sm">No units assigned.</div>' : '';
             activeUnits.forEach(u => {
-                const color = u.triageCategory === 'Red' ? 'border-red-500' : u.triageCategory === 'Yellow' ? 'border-yellow-500' : u.triageCategory === 'Green' ? 'border-emerald-500' : 'border-slate-500';
-                const card = document.createElement('div');
-                card.className = `glass-card p-4 rounded-2xl border-l-8 ${color} flex justify-between items-center shadow-lg`;
-                card.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="h-10 w-10 bg-slate-800 rounded-full flex items-center justify-center shrink-0">
-                            <span class="text-xs font-black text-slate-300">${u.unitId.substring(0,2)}</span>
+                const div = document.createElement('div');
+                div.className = `bg-gray-800 p-3 rounded-xl flex items-center gap-3 triage-border-${u.triageCategory}`;
+                div.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-lg uppercase">${u.unitId}</span>
+                            <span id="timer-${u.id}" class="text-xs text-gray-500 font-mono">0:00</span>
                         </div>
-                        <div>
-                            <p class="text-lg font-black text-white leading-tight">${u.unitId}</p>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">${u.unitType} • ${u.patientCount} Pts</p>
-                        </div>
+                        <div class="text-[10px] text-gray-500 font-bold">${u.unitType} • ${u.patientCount} PTS</div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="removeActive(${u.id})" class="p-2 text-slate-600 hover:text-red-400">✕</button>
-                        <button onclick="openTransportModal(${u.id})" class="bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-black uppercase italic active:scale-95 transition-all">Depart</button>
-                    </div>
+                    <select onchange="updateTriage('active', ${u.id}, this.value)" class="bg-gray-900 text-xs font-bold p-2 rounded border border-gray-700">
+                        <option value="Red" ${u.triageCategory==='Red'?'selected':''}>RED</option>
+                        <option value="Yellow" ${u.triageCategory==='Yellow'?'selected':''}>YELLOW</option>
+                        <option value="Green" ${u.triageCategory==='Green'?'selected':''}>GREEN</option>
+                        <option value="Black" ${u.triageCategory==='Black'?'selected':''}>BLACK</option>
+                    </select>
+                    <button onclick="openTransportModal(${u.id})" class="bg-blue-600 px-4 py-2 rounded-lg font-bold text-xs uppercase active:scale-95 transition-transform">Depart</button>
                 `;
-                list.appendChild(card);
+                activeListEl.appendChild(div);
             });
-            document.getElementById('active-count').innerText = activeUnits.length;
-        }
 
-        function openTransportModal(id) {
-            currentTransportId = id;
-            document.getElementById('modal-refusal').checked = false;
-            document.getElementById('modal-destination').disabled = false;
-            toggleModal('transport-modal');
-        }
-
-        function confirmTransport() {
-            const dest = document.getElementById('modal-refusal').checked ? "PATIENT REFUSAL" : document.getElementById('modal-destination').value;
-            if (!dest) return alert("Select Destination");
-            const index = activeUnits.findIndex(u => u.id === currentTransportId);
-            if (index !== -1) {
-                const unit = activeUnits[index];
-                unit.destination = dest;
-                unit.transportTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                activeUnits.splice(index, 1);
-                transportHistory.unshift(unit);
-                renderActive(); renderHistory(); updateTotals();
-                toggleModal('transport-modal');
-            }
-        }
-
-        function renderHistory() {
-            const log = document.getElementById('transport-log');
-            log.innerHTML = transportHistory.length === 0 ? '<div class="text-center py-10 glass-card rounded-2xl border-dashed border-slate-700 text-slate-500 text-sm">No transports yet.</div>' : '';
+            const transportLogEl = document.getElementById('transport-log');
+            transportLogEl.innerHTML = transportHistory.length === 0 ? '<div class="text-center text-gray-600 py-8 italic text-sm">No transports logged.</div>' : '';
             transportHistory.forEach(t => {
-                const color = t.triageCategory === 'Red' ? 'text-red-500' : t.triageCategory === 'Yellow' ? 'text-yellow-500' : 'text-emerald-500';
-                const card = document.createElement('div');
-                card.className = "glass-card p-3 rounded-xl flex items-center gap-4 text-xs opacity-80";
-                card.innerHTML = `
-                    <div class="w-12 shrink-0 font-black text-white border-r border-slate-700">${t.unitId}</div>
-                    <div class="flex-1 truncate">
-                        <p class="font-bold text-slate-200">${t.destination}</p>
-                        <p class="text-[9px] text-slate-500 uppercase">${t.patientCount} Pts • <span class="${color}">${t.triageCategory}</span></p>
+                const div = document.createElement('div');
+                div.className = `bg-gray-900 p-3 rounded-lg border border-gray-800 triage-border-${t.triageCategory}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="font-black text-sm uppercase">${t.unitId} <span class="text-[10px] text-gray-500 ml-2">(${t.unitType})</span></div>
+                        <button onclick="returnToScene(${t.id})" class="text-[9px] bg-gray-800 text-orange-400 font-bold px-2 py-1 rounded">UNDO</button>
                     </div>
-                    <div class="text-[9px] font-bold text-slate-600">${t.transportTime}</div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-[10px] text-gray-400 truncate max-w-[200px]">📍 ${t.destination} @ ${t.transportTime}</div>
+                        <div class="text-[9px] text-gray-600 italic">${t.onSceneDuration || '--'}</div>
+                    </div>
                 `;
-                log.appendChild(card);
+                transportLogEl.appendChild(div);
             });
-            document.getElementById('log-count').innerText = transportHistory.length;
+            updateStats();
         }
 
-        function updateTotals() {
-            let totalPatients = 0; let totalRefusals = 0;
-            let red = 0, yellow = 0, green = 0;
-            [...activeUnits, ...transportHistory].forEach(t => {
-                const p = t.patientCount || 0;
-                totalPatients += p;
-                if (t.destination === 'PATIENT REFUSAL') totalRefusals += p;
-                if(t.triageCategory === 'Red') red += p;
-                if(t.triageCategory === 'Yellow') yellow += p;
-                if(t.triageCategory === 'Green') green += p;
+        function updateStats() {
+            let pts = 0, red = 0, yellow = 0, green = 0, black = 0, ref = 0;
+            [...activeUnits, ...transportHistory].forEach(u => {
+                const count = u.patientCount || 0;
+                pts += count;
+                if(u.triageCategory === 'Red') red += count;
+                if(u.triageCategory === 'Yellow') yellow += count;
+                if(u.triageCategory === 'Green') green += count;
+                if(u.triageCategory === 'Black') black += count;
+                if(u.destination === 'PATIENT REFUSAL') ref += count;
             });
-            document.getElementById('total-patients').innerText = totalPatients;
-            document.getElementById('total-refusals').innerText = totalRefusals;
-            document.getElementById('total-units').innerText = transportHistory.length;
+            document.getElementById('total-patients').innerText = pts;
             document.getElementById('total-red').innerText = red;
             document.getElementById('total-yellow').innerText = yellow;
             document.getElementById('total-green').innerText = green;
+            document.getElementById('total-black').innerText = black;
+            document.getElementById('total-refusals').innerText = ref;
         }
 
-        function removeActive(id) {
-            if(confirm("Cancel Unit Assignment?")) {
-                activeUnits = activeUnits.filter(u => u.id !== id);
-                renderActive(); updateTotals();
+        function openTransportModal(id) {
+            const unit = activeUnits.find(x => x.id === id);
+            if (!unit) return;
+            currentTransportId = id;
+            document.getElementById('modal-transport-unit-id').value = unit.unitId;
+            document.getElementById('modal-transport-unit-type').value = unit.unitType;
+            document.getElementById('modal-destination').value = "";
+            document.getElementById('modal-refusal').checked = false;
+            document.getElementById('modal-destination').disabled = false;
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            currentTransportId = null;
+        }
+
+        function confirmTransport() {
+            if (!currentTransportId) return;
+            const isRefusal = document.getElementById('modal-refusal').checked;
+            const dest = isRefusal ? "PATIENT REFUSAL" : document.getElementById('modal-destination').value;
+            const unitIdInput = document.getElementById('modal-transport-unit-id').value.trim();
+            const unitTypeInput = document.getElementById('modal-transport-unit-type').value;
+
+            if(!unitIdInput || (!dest && !isRefusal)) {
+                alert("Fill all details.");
+                return;
+            }
+
+            const idx = activeUnits.findIndex(u => u.id === currentTransportId);
+            if (idx !== -1) {
+                const unit = activeUnits.splice(idx, 1)[0];
+                const totalSec = Math.floor((Date.now() - unit.assignedTimestamp) / 1000);
+                unit.onSceneDuration = `${Math.floor(totalSec / 60)}m ${totalSec % 60}s`;
+                unit.unitId = unitIdInput.toUpperCase();
+                unit.unitType = unitTypeInput;
+                unit.destination = dest;
+                unit.transportTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                transportHistory.unshift(unit);
+                closeModal();
+                renderAll();
             }
         }
 
-        function toggleLayout() {
-            const body = document.getElementById('body-tag');
-            const main = document.getElementById('main-container');
-            const icon = document.getElementById('view-icon');
-            const isDesktop = main.classList.toggle('force-desktop');
-            body.style.overflowX = isDesktop ? 'auto' : 'hidden';
-        }
-
         function exportToCSV() {
-            const records = [...transportHistory, ...activeUnits];
-            if(!records.length) return alert("No data to export.");
-            let csv = "data:text/csv;charset=utf-8,\uFEFFUnit ID,Type,Patients,Category,Destination,Time\n";
-            records.forEach(r => {
-                csv += `${r.unitId},${r.unitType},${r.patientCount},${r.triageCategory},"${r.destination || 'ON SCENE'}",${r.transportTime || r.assignedTime}\n`;
+            let csv = "Unit,Pts,Triage,Destination,Time,On-Scene Duration\n";
+            [...transportHistory, ...activeUnits].forEach(r => {
+                csv += `${r.unitId},${r.patientCount},${r.triageCategory},"${r.destination || 'ON SCENE'}",${r.transportTime || 'N/A'},${r.onSceneDuration || 'N/A'}\n`;
             });
-            const link = document.createElement("a");
-            link.href = encodeURI(csv);
-            link.download = `Med_Log.csv`;
-            link.click();
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url); a.setAttribute('download', 'MedLog.csv');
+            a.click();
         }
     </script>
 </body>
