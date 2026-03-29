@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHFR Resource Dashboard (Local)</title>
     
-    <link rel="icon" type="image/png" href="image_2.png">
-    
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#111827">
+    <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <style>
         [x-cloak] { display: none !important; }
         .file-icon-pdf { color: #ef4444; }
@@ -21,32 +19,25 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800" x-data="appData()">
-
     <div class="flex h-screen overflow-hidden">
-
         <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 lg:hidden" x-cloak></div>
-
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-900 text-white transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl flex flex-col">
             <div class="flex items-center justify-center h-20 bg-slate-800 border-b border-slate-700">
                 <h1 class="text-2xl font-bold tracking-wider"><i class="fa-solid fa-fire-burner mr-2"></i>PHFR <span class="text-xs bg-red-600 rounded px-1 ml-1">LOCAL</span></h1>
             </div>
-
             <nav class="flex-1 px-4 py-6 space-y-2">
                 <button @click="currentTab = 'home'; sidebarOpen = false" :class="currentTab === 'home' ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-slate-800 hover:text-white'" class="flex items-center w-full px-4 py-3 rounded-lg transition-colors mobile-tap-target">
                     <i class="fa-solid fa-house w-6"></i>
                     <span class="font-medium">Dashboard</span>
                 </button>
-
                 <button @click="currentTab = 'fire'; sidebarOpen = false" :class="currentTab === 'fire' ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-slate-800 hover:text-white'" class="flex items-center w-full px-4 py-3 rounded-lg transition-colors mobile-tap-target">
                     <i class="fa-solid fa-fire-extinguisher w-6"></i>
                     <span class="font-medium">Fire Resources</span>
                 </button>
-
                 <button @click="currentTab = 'ems'; sidebarOpen = false" :class="currentTab === 'ems' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-slate-800 hover:text-white'" class="flex items-center w-full px-4 py-3 rounded-lg transition-colors mobile-tap-target">
                     <i class="fa-solid fa-heart-pulse w-6"></i>
                     <span class="font-medium">EMS Resources</span>
                 </button>
-                
                 <div class="pt-4 mt-4 border-t border-slate-700">
                     <p class="px-4 text-xs text-gray-500 uppercase font-bold mb-2">Data Management</p>
                     <button @click="exportData()" class="flex items-center w-full px-4 py-2 text-gray-400 hover:bg-slate-800 hover:text-green-400 transition-colors">
@@ -64,14 +55,12 @@
                     </button>
                 </div>
             </nav>
-
             <div class="p-4 border-t border-slate-700">
                 <button @click="showUploadModal = true" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex justify-center items-center gap-2 mobile-tap-target">
                     <i class="fa-solid fa-plus"></i> Add Document
                 </button>
             </div>
         </aside>
-
         <div class="flex-1 flex flex-col overflow-hidden">
             <header class="flex items-center justify-between p-4 bg-white shadow lg:hidden">
                 <button @click="sidebarOpen = true" class="text-gray-600 focus:outline-none mobile-tap-target">
@@ -80,9 +69,7 @@
                 <span class="font-bold text-lg">PHFR Manager</span>
                 <div class="w-6"></div>
             </header>
-
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6">
-                
                 <div x-show="currentTab === 'home'" x-cloak>
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Quick Links</h2>
@@ -90,7 +77,6 @@
                             <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Buttons
                         </button>
                     </div>
-                    
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         <template x-for="link in links" :key="link.name">
                             <a :href="link.url" target="_blank" class="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md hover:bg-red-50 transition border border-gray-200 cursor-pointer h-32 text-center group relative">
@@ -100,13 +86,11 @@
                         </template>
                     </div>
                 </div>
-
                 <div x-show="currentTab === 'fire'" x-cloak>
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Fire Documents</h2>
                         <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="getFiles('Fire').length + ' Files'"></span>
                     </div>
-                    
                     <div class="bg-white rounded-lg shadow overflow-hidden">
                         <ul class="divide-y divide-gray-200">
                             <template x-for="file in getFiles('Fire')" :key="file.id">
@@ -134,7 +118,6 @@
                         </ul>
                     </div>
                 </div>
-
                 <div x-show="currentTab === 'ems'" x-cloak>
                     <div class="flex justify-between items-center mb-6 border-b pb-2">
                         <h2 class="text-2xl font-bold text-gray-800">EMS Documents</h2>
@@ -167,11 +150,9 @@
                         </ul>
                     </div>
                 </div>
-
             </main>
         </div>
     </div>
-
     <div x-show="showUploadModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="showUploadModal" class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showUploadModal = false"></div>
@@ -218,7 +199,6 @@
             </div>
         </div>
     </div>
-
     <div x-show="showLinkModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="showLinkModal" class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showLinkModal = false"></div>
@@ -226,7 +206,6 @@
             <div x-show="showLinkModal" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4" id="modal-title">Edit Quick Links</h3>
-                    
                     <div class="max-h-96 overflow-y-auto pr-2">
                         <template x-for="(link, index) in links" :key="index">
                             <div class="grid grid-cols-12 gap-2 mb-3 items-center bg-gray-50 p-2 rounded">
@@ -242,7 +221,6 @@
                             </div>
                         </template>
                     </div>
-
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button @click="saveLinks()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
@@ -255,7 +233,6 @@
             </div>
         </div>
     </div>
-
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('appData', () => ({
@@ -263,13 +240,8 @@
                 currentTab: 'home',
                 showUploadModal: false,
                 showLinkModal: false,
-                
-                // Active State
                 links: [],
                 allFiles: [],
-                
-                // --- FACTORY DEFAULTS ---
-                // Total 15 buttons
                 defaultLinks: [
                     { name: 'Dispatch Center', icon: 'fa-solid fa-headset', url: 'https://www.google.com' },
                     { name: 'Weather Radar', icon: 'fa-solid fa-cloud-sun-rain', url: '#' },
@@ -287,7 +259,6 @@
                     { name: 'Mechanic Request', icon: 'fa-solid fa-screwdriver-wrench', url: '#' },
                     { name: 'Union Rep', icon: 'fa-solid fa-users', url: '#' },
                 ],
-
                 defaultFiles: [
                     { id: 'sys1', name: 'PHFR Exposure Control Plan', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR Exposure Control Plan revision 10-2022 (1).pdf' },
                     { id: 'sys2', name: 'Officer Clipboard - Fire Watch', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Fire Watch Requirements.pdf' },
@@ -300,13 +271,9 @@
                     { id: 'sys9', name: 'Officer Clipboard - Fire Watch Log', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Fire Watch Log.pdf' },
                     { id: 'sys10', name: 'Officer Clipboard - Open Burning', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Open Burning Policy.pdf' },
                 ],
-
                 newFile: { name: '', category: 'Fire', path: '', type: '' },
-
                 init() {
                     this.loadFromLocal();
-                    
-                    // --- DATA MIGRATION FIX ---
                     let dirty = false;
                     this.allFiles = this.allFiles.map(f => {
                         if (!f.id) {
@@ -317,9 +284,6 @@
                     });
                     if (dirty) this.saveToLocal();
                 },
-
-                // --- DATA PERSISTENCE ---
-
                 loadFromLocal() {
                     const savedData = localStorage.getItem('phfr_data_v2'); 
                     if (savedData) {
@@ -335,22 +299,17 @@
                         this.restoreDefaults();
                     }
                 },
-
                 saveToLocal() {
                     localStorage.setItem('phfr_data_v2', JSON.stringify({
                         links: this.links,
                         allFiles: this.allFiles
                     }));
                 },
-
                 restoreDefaults() {
                     this.links = JSON.parse(JSON.stringify(this.defaultLinks));
                     this.allFiles = JSON.parse(JSON.stringify(this.defaultFiles));
                     this.saveToLocal();
                 },
-
-                // --- EXPORT / IMPORT ---
-
                 exportData() {
                     const data = JSON.stringify({
                         links: this.links,
@@ -366,35 +325,28 @@
                     a.click();
                     document.body.removeChild(a);
                 },
-
                 importData(event) {
                     const file = event.target.files[0];
                     if(!file) return;
-
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         try {
                             const data = JSON.parse(e.target.result);
                             if(confirm("This will overwrite your current dashboard settings. Continue?")) {
-                                // SAFE IMPORT: Fixes broken or empty links
                                 if(Array.isArray(data.links)) {
                                     this.links = data.links.map(link => ({
                                         name: link.name || 'Untitled',
-                                        // Auto-repair missing icons
                                         icon: (link.icon && link.icon.length > 5) ? link.icon : 'fa-solid fa-link', 
-                                        // Auto-repair missing URLs
                                         url: (link.url && link.url.length > 0) ? link.url : '#' 
                                     }));
                                 } else {
                                     this.links = this.defaultLinks;
                                 }
-                                
                                 let importedFiles = data.allFiles || [];
                                 importedFiles = importedFiles.map(f => {
                                     if(!f.id) f.id = 'doc_' + Math.random().toString(36).substr(2, 9);
                                     return f;
                                 });
-                                
                                 this.allFiles = importedFiles;
                                 this.saveToLocal();
                                 alert('Configuration loaded successfully!');
@@ -406,47 +358,35 @@
                     reader.readAsText(file);
                     event.target.value = ''; 
                 },
-
-                // --- MASTER RESET ---
-                
                 masterReset() {
-                    if(confirm("MASTER RESET: This will DELETE all your custom links and files and restore the original factory settings (Including new Morning Roll Call button). Are you sure?")) {
+                    if(confirm("MASTER RESET: This will DELETE all your custom links and files and restore the original factory settings. Are you sure?")) {
                         localStorage.removeItem('phfr_data_v2');
                         location.reload();
                     }
                 },
-
-                // --- APP LOGIC ---
-
                 saveLinks() {
                     this.saveToLocal();
                     this.showLinkModal = false;
                 },
-
                 getFiles(category) {
                     return this.allFiles.filter(f => f.category === category);
                 },
-
                 handleFileSelect(event) {
                     const file = event.target.files[0];
                     if (file) {
                         const fileName = file.name;
-                        
                         if(!this.newFile.name) this.newFile.name = fileName.split('.')[0];
                         this.newFile.path = 'documents/' + fileName;
-                        
                         if(fileName.toLowerCase().includes('.pdf')) this.newFile.type = 'pdf';
                         else if(fileName.toLowerCase().includes('.doc')) this.newFile.type = 'word';
                         else this.newFile.type = 'other';
                     }
                 },
-
                 addFile() {
                     if (!this.newFile.name || !this.newFile.path) {
                         alert("Please provide a name and path.");
                         return;
                     }
-
                     const newDoc = {
                         id: 'doc_' + Date.now() + Math.floor(Math.random() * 1000),
                         name: this.newFile.name,
@@ -454,31 +394,25 @@
                         type: this.newFile.type || 'other',
                         url: this.newFile.path
                     };
-
                     this.allFiles.push(newDoc);
                     this.saveToLocal();
-
                     this.newFile = { name: '', category: 'Fire', path: '', type: '' };
                     this.showUploadModal = false;
                     this.currentTab = newDoc.category.toLowerCase();
                 },
-
                 deleteFile(fileId) {
                     if (!fileId) {
                         alert("Error: Cannot delete file (Missing ID). Please refresh the page to fix this file.");
                         return;
                     }
-
                     const fileToRemove = this.allFiles.find(f => f.id === fileId);
                     if (!fileToRemove) return;
-
                     if (confirm(`Remove link to "${fileToRemove.name}"?`)) {
                         const filtered = this.allFiles.filter(f => f.id !== fileId);
                         this.allFiles = [...filtered];
                         this.saveToLocal();
                     }
                 },
-
                 getFileIcon(type) {
                     if (type === 'pdf') return 'fa-solid fa-file-pdf file-icon-pdf';
                     if (type === 'word') return 'fa-solid fa-file-word file-icon-word';
@@ -487,5 +421,19 @@
             }))
         });
     </script>
-</body>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    // Registration was successful
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    // registration failed :(
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+    </body>
 </html>
