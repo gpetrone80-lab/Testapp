@@ -153,6 +153,7 @@
             </main>
         </div>
     </div>
+
     <div x-show="showUploadModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div x-show="showUploadModal" class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showUploadModal = false"></div>
@@ -160,15 +161,10 @@
             <div x-show="showUploadModal" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Add Local File Reference</h3>
-                    <div class="mt-2 bg-yellow-50 border-l-4 border-yellow-400 p-3">
-                        <p class="text-xs text-yellow-700">
-                            <strong>Note:</strong> Since this is offline, you must manually place the file in the <code class="bg-yellow-100 px-1 rounded">documents</code> folder on your drive before adding it here.
-                        </p>
-                    </div>
                     <div class="mt-4 space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Display Name</label>
-                            <input type="text" x-model="newFile.name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="e.g. New Protocols 2026">
+                            <input type="text" x-model="newFile.name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Category</label>
@@ -178,95 +174,45 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Select File (to get filename)</label>
-                            <input type="file" @change="handleFileSelect" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
+                            <label class="block text-sm font-medium text-gray-700">Select File</label>
+                            <input type="file" @change="handleFileSelect" class="mt-1 block w-full text-sm text-gray-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">File Path (Relative)</label>
                             <input type="text" x-model="newFile.path" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-50 text-gray-600 sm:text-sm">
-                            <p class="text-xs text-gray-400 mt-1">Ensure the file is actually at this location.</p>
                         </div>
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button @click="addFile()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                        Add Reference
-                    </button>
-                    <button @click="showUploadModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
-                    </button>
+                    <button @click="addFile()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm">Add Reference</button>
+                    <button @click="showUploadModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
-    <div x-show="showLinkModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="showLinkModal" class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showLinkModal = false"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div x-show="showLinkModal" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4" id="modal-title">Edit Quick Links</h3>
-                    <div class="max-h-96 overflow-y-auto pr-2">
-                        <template x-for="(link, index) in links" :key="index">
-                            <div class="grid grid-cols-12 gap-2 mb-3 items-center bg-gray-50 p-2 rounded">
-                                <div class="col-span-1 text-center text-gray-400">
-                                    <i :class="link.icon"></i>
-                                </div>
-                                <div class="col-span-4">
-                                    <input type="text" x-model="link.name" class="w-full text-sm border-gray-300 rounded border p-1" placeholder="Button Name">
-                                }
-                                <div class="col-span-7">
-                                    <input type="text" x-model="link.url" class="w-full text-sm border-gray-300 rounded border p-1" placeholder="https://...">
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button @click="saveLinks()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                        Save Changes
-                    </button>
-                    <button @click="showLinkModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+
     <script>
-        // The embedded configuration data from phfr_dashboard_config (2).json
+        // Integrated links from phfr_dashboard_config (2).json
         const EMBEDDED_PHFR_CONFIG = {
             "links": [
-                { "name": "Dispatch Center", "icon": "fa-solid fa-headset", "url": "https://www.google.com" },
-                { "name": "Weather Radar", "icon": "fa-solid fa-cloud-sun-rain", "url": "#" },
-                { "name": "Traffic Cams", "icon": "fa-solid fa-road", "url": "#" },
-                { "name": "Protocol Portal", "icon": "fa-solid fa-book-medical", "url": "#" },
-                { "name": "Hospital Status", "icon": "fa-solid fa-hospital", "url": "#" },
-                { "name": "Staff Schedule", "icon": "fa-solid fa-calendar-days", "url": "#" },
-                { "name": "HazMat Guide", "icon": "fa-solid fa-triangle-exclamation", "url": "#" },
-                { "name": "Training LMS", "icon": "fa-solid fa-graduation-cap", "url": "#" },
-                { "name": "Fleet Maint.", "icon": "fa-solid fa-wrench", "url": "#" },
-                { "name": "Dept Email", "icon": "fa-solid fa-envelope", "url": "#" },
-                { "name": "Morning Roll Call", "icon": "fa-solid fa-clipboard-user", "url": "#" },
-                { "name": "Station Log", "icon": "fa-solid fa-book", "url": "#" },
-                { "name": "Hydrant Map", "icon": "fa-solid fa-map-location-dot", "url": "#" },
-                { "name": "Mechanic Request", "icon": "fa-solid fa-screwdriver-wrench", "url": "#" },
-                { "name": "Union Rep", "icon": "fa-solid fa-users", "url": "#" }
+                { "name": "Dispatch Center", "icon": "fa-solid fa-headset", "url": "https://911.pinellas.gov/" },
+                { "name": "Image Trend Yellow", "icon": "fa-solid fa-cloud-sun-rain", "url": "https://pinellascounty.imagetrendelite.com/Elite/Organizationpinellascounty/?logout" },
+                { "name": "Vector Solution", "icon": "fa-solid fa-road", "url": "https://app.targetsolutions.com/auth/index.cfm?action=login.showlogin&customerid=16061&customerpath=palmharborfire" },
+                { "name": "Pinellas County Mom", "icon": "fa-solid fa-book-medical", "url": "https://pcemsomd.com/" },
+                { "name": "Hospital Status", "icon": "fa-solid fa-hospital", "url": "https://hs.sunstarems.com/" },
+                { "name": "Department Calendar", "icon": "fa-solid fa-calendar-days", "url": "https://outlook.office365.com/calendar/published/19aade923b7344d2a321b8ba62ae15b3@palmharborfd.com/73c49905a6fd44739ced72ca58399a0e3049452539445466519/calendar.html" },
+                { "name": "HazMat Mom", "icon": "fa-solid fa-triangle-exclamation", "url": "https://pcemsomd.com/wp-admin/admin-ajax.php?juwpfisadmin=false&action=wpfd&task=file.download&wpfd_category_id=182&wpfd_file_id=17916&token=a4b2d66b00097418225526f1fa3d79c2&preview=1" },
+                { "name": "Hospital specialty", "icon": "fa-solid fa-graduation-cap", "url": "https://hs.sunstarems.com/chart.html" },
+                { "name": "PSTRAX Login", "icon": "fa-solid fa-wrench", "url": "https://app1.pstrax.com/" },
+                { "name": "Dept Email", "icon": "fa-solid fa-envelope", "url": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=9199bf20-a13f-4107-85dc-02114787ef48&scope=https%3A%2F%2Foutlook.office.com%2F.default%20openid%20profile%20offline_access&redirect_uri=https%3A%2F%2Foutlook.live.com%2Fmail%2F&client-request-id=3dc34b5a-f05a-915e-c927-4679906cf2f5&response_mode=fragment&client_info=1&prompt=select_account&nonce=019c0ae0-9a6f-764c-9352-e564f711c1e9&state=eyJpZCI6IjAxOWMwYWUwLTlhNmYtN2ExOS1hNzRlLTg2YWNmOGYyZmM3MSIsIm1ldGEiOnsiaW50ZXJhY3Rpb25UeXBlIjoicmVkaXJlY3QifX0%3D%7CaHR0cHM6Ly9vdXRsb29rLmxpdmUuY29tL21haWwvMC8_ZGVlcGxpbms9bWFpbCUyRjAlMkY&claims=%7B%22access_token%22%3A%7B%22xms_cc%22%3A%7B%22values%22%3A%5B%22CP1%22%5D%7D%7D%7D&x-client-SKU=msal.js.browser&x-client-VER=4.26.0&response_type=code&code_challenge=iXQGi_2AY40obizmDB6Mu6ozacSUf4B0SabJQhCCglM&code_challenge_method=S256&cobrandid=ab0455a0-8d03-46b9-b18b-df2f57b9e44c&fl=dob,flname,wld" },
+                { "name": "Morning Roll Call", "icon": "fa-solid fa-clipboard-user", "url": "file:///C:/Users/User/Documents/Petrone/Nuovo/Morning%20Roll%20Call.html" },
+                { "name": "Smart draw", "icon": "fa-solid fa-book", "url": "https://www.smartdraw.com/myaccount/login.aspx" },
+                { "name": "Fire Works", "icon": "fa-solid fa-map-location-dot", "url": "https://login.eprsys.com/Home/loginV3" },
+                { "name": "Crewsense", "icon": "fa-solid fa-screwdriver-wrench", "url": "https://www.crewsense.com/Application/Login" },
+                { "name": "911 Web", "icon": "fa-solid fa-users", "url": "http://911web/pincoweb/Login2.asp" }
             ],
-            "allFiles": [
-                { "id": "sys1", "name": "PHFR Exposure Control Plan", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR Exposure Control Plan revision 10-2022 (1).pdf" },
-                { "id": "sys2", "name": "Officer Clipboard - Fire Watch", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Fire Watch Requirements.pdf" },
-                { "id": "sys3", "name": "Officer Clipboard - Witness Forms", "category": "Fire", "type": "word", "url": "Fire_Resources/PHFR - Officer Clipboard - Witness Forms.docx" },
-                { "id": "sys4", "name": "Elderlinks Referral Form", "category": "EMS", "type": "pdf", "url": "Fire_Resources/Elderlinks_referral_form.pdf" },
-                { "id": "sys5", "name": "Division of EMS - Incident Report", "category": "EMS", "type": "word", "url": "Fire_Resources/Division of EMS - Incident Report.docx" },
-                { "id": "sys6", "name": "On Scene Personnel List", "category": "Fire", "type": "word", "url": "Fire_Resources/PHFR - Officer Clipboard - On Scene Personnel 2023-11.docx" },
-                { "id": "sys7", "name": "Infectious Exposure Form", "category": "EMS", "type": "pdf", "url": "Fire_Resources/PHFR_InfectiousExposureForm.pdf" },
-                { "id": "sys8", "name": "Officer Clipboard - Staging Worksheet", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Staging Worksheet.pdf" },
-                { "id": "sys9", "name": "Officer Clipboard - Fire Watch Log", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Fire Watch Log.pdf" },
-                { "id": "sys10", "name": "Officer Clipboard - Open Burning", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Open Burning Policy.pdf" }
-            ],
-            "exportedAt": "2/2/2026" // Retaining metadata from export
+            "allFiles": [],
+            "exportedAt": "2/16/2026"
         };
     </script>
     <script>
@@ -278,79 +224,35 @@
                 showLinkModal: false,
                 links: [],
                 allFiles: [],
-                
-                // Keep default backups (factory settings)
-                defaultLinks: EMBEDDED_PHFR_CONFIG.links, // Used for master reset backup
-                defaultFiles: EMBEDDED_PHFR_CONFIG.allFiles, // Used for master reset backup
-
                 newFile: { name: '', category: 'Fire', path: '', type: '' },
                 
-                init() {
-                    this.loadFromLocal();
-                    
-                    // --- DATA MIGRATION FIX ---
-                    // Ensure all files have valid IDs
-                    let dirty = false;
-                    this.allFiles = this.allFiles.map(f => {
-                        if (!f.id) {
-                            f.id = 'doc_' + Math.random().toString(36).substr(2, 9);
-                            dirty = true;
-                        }
-                        return f;
-                    });
-                    if (dirty) this.saveToLocal();
-                },
-                
-                // --- DATA PERSISTENCE ---
-
+                init() { this.loadFromLocal(); },
                 loadFromLocal() {
-                    const savedData = localStorage.getItem('phfr_data_v2'); 
-                    if (savedData) {
+                    const saved = localStorage.getItem('phfr_data_v2'); 
+                    if (saved) {
                         try {
-                            const parsed = JSON.parse(savedData);
+                            const parsed = JSON.parse(saved);
                             this.links = parsed.links || EMBEDDED_PHFR_CONFIG.links;
-                            this.allFiles = parsed.allFiles || EMBEDDED_PHFR_CONFIG.allFiles;
-                        } catch(e) { 
-                            console.error('Error loading data', e); 
-                            this.restoreDefaults(); 
-                        }
-                    } else {
-                        this.restoreDefaults();
-                    }
+                            this.allFiles = parsed.allFiles || [];
+                        } catch(e) { this.restoreDefaults(); }
+                    } else { this.restoreDefaults(); }
                 },
-
                 saveToLocal() {
-                    localStorage.setItem('phfr_data_v2', JSON.stringify({
-                        links: this.links,
-                        allFiles: this.allFiles
-                    }));
+                    localStorage.setItem('phfr_data_v2', JSON.stringify({ links: this.links, allFiles: this.allFiles }));
                 },
-
                 restoreDefaults() {
-                    // Restore from the EMBEDDED config instead of the hardcoded defaultLinks/defaultFiles
                     this.links = JSON.parse(JSON.stringify(EMBEDDED_PHFR_CONFIG.links));
-                    this.allFiles = JSON.parse(JSON.stringify(EMBEDDED_PHFR_CONFIG.allFiles));
+                    this.allFiles = [];
                     this.saveToLocal();
                 },
-                
-                // --- EXPORT / IMPORT ---
-
                 exportData() {
-                    const data = JSON.stringify({
-                        links: this.links,
-                        allFiles: this.allFiles,
-                        exportedAt: new Date().toLocaleDateString()
-                    });
+                    const data = JSON.stringify({ links: this.links, allFiles: this.allFiles, exportedAt: new Date().toLocaleDateString() });
                     const blob = new Blob([data], {type: 'application/json'});
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'phfr_dashboard_config.json';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+                    a.href = url; a.download = 'phfr_dashboard_config.json';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 },
-
                 importData(event) {
                     const file = event.target.files[0];
                     if(!file) return;
@@ -358,118 +260,43 @@
                     reader.onload = (e) => {
                         try {
                             const data = JSON.parse(e.target.result);
-                            if(confirm("This will overwrite your current dashboard settings. Continue?")) {
-                                if(Array.isArray(data.links)) {
-                                    this.links = data.links.map(link => ({
-                                        name: link.name || 'Untitled',
-                                        icon: (link.icon && link.icon.length > 5) ? link.icon : 'fa-solid fa-link', 
-                                        url: (link.url && link.url.length > 0) ? link.url : '#' 
-                                    }));
-                                } else {
-                                    this.links = EMBEDDED_PHFR_CONFIG.links;
-                                }
-                                let importedFiles = data.allFiles || [];
-                                importedFiles = importedFiles.map(f => {
-                                    if(!f.id) f.id = 'doc_' + Math.random().toString(36).substr(2, 9);
-                                    return f;
-                                });
-                                this.allFiles = importedFiles;
+                            if(confirm("Overwrite settings?")) {
+                                this.links = data.links || EMBEDDED_PHFR_CONFIG.links;
+                                this.allFiles = data.allFiles || [];
                                 this.saveToLocal();
-                                alert('Configuration loaded successfully!');
+                                alert('Loaded!');
                             }
-                        } catch(err) {
-                            alert('Invalid configuration file.');
-                        }
+                        } catch(err) { alert('Invalid file.'); }
                     };
                     reader.readAsText(file);
-                    event.target.value = ''; 
                 },
-                
-                // --- MASTER RESET ---
-                
                 masterReset() {
-                    if(confirm("MASTER RESET: This will DELETE all your custom links and files and restore the original embedded settings. Are you sure?")) {
-                        localStorage.removeItem('phfr_data_v2');
-                        // No need to manually restoreDefaults(); reload will trigger loadFromLocal() which calls restoreDefaults() when no saved data is found.
-                        location.reload();
+                    if(confirm("Master Reset?")) { localStorage.removeItem('phfr_data_v2'); location.reload(); }
+                },
+                getFiles(cat) { return this.allFiles.filter(f => f.category === cat); },
+                handleFileSelect(e) {
+                    const f = e.target.files[0];
+                    if (f) {
+                        if(!this.newFile.name) this.newFile.name = f.name.split('.')[0];
+                        this.newFile.path = 'documents/' + f.name;
+                        this.newFile.type = f.name.toLowerCase().includes('.pdf') ? 'pdf' : (f.name.toLowerCase().includes('.doc') ? 'word' : 'other');
                     }
                 },
-                
-                saveLinks() {
-                    this.saveToLocal();
-                    this.showLinkModal = false;
-                },
-                
-                getFiles(category) {
-                    return this.allFiles.filter(f => f.category === category);
-                },
-                
-                handleFileSelect(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const fileName = file.name;
-                        if(!this.newFile.name) this.newFile.name = fileName.split('.')[0];
-                        this.newFile.path = 'documents/' + fileName;
-                        if(fileName.toLowerCase().includes('.pdf')) this.newFile.type = 'pdf';
-                        else if(fileName.toLowerCase().includes('.doc')) this.newFile.type = 'word';
-                        else this.newFile.type = 'other';
-                    }
-                },
-                
                 addFile() {
-                    if (!this.newFile.name || !this.newFile.path) {
-                        alert("Please provide a name and path.");
-                        return;
-                    }
-                    const newDoc = {
-                        id: 'doc_' + Date.now() + Math.floor(Math.random() * 1000),
-                        name: this.newFile.name,
-                        category: this.newFile.category,
-                        type: this.newFile.type || 'other',
-                        url: this.newFile.path
-                    };
-                    this.allFiles.push(newDoc);
+                    if (!this.newFile.name || !this.newFile.path) return alert("Missing info");
+                    this.allFiles.push({ id: 'doc_' + Date.now(), ...this.newFile, url: this.newFile.path });
                     this.saveToLocal();
                     this.newFile = { name: '', category: 'Fire', path: '', type: '' };
                     this.showUploadModal = false;
-                    this.currentTab = newDoc.category.toLowerCase();
                 },
-                
-                deleteFile(fileId) {
-                    if (!fileId) {
-                        alert("Error: Cannot delete file (Missing ID). Please refresh the page to fix this file.");
-                        return;
-                    }
-                    const fileToRemove = this.allFiles.find(f => f.id === fileId);
-                    if (!fileToRemove) return;
-                    if (confirm(`Remove link to "${fileToRemove.name}"?`)) {
-                        const filtered = this.allFiles.filter(f => f.id !== fileId);
-                        this.allFiles = [...filtered];
-                        this.saveToLocal();
-                    }
+                deleteFile(id) {
+                    if (confirm(`Remove?`)) { this.allFiles = this.allFiles.filter(f => f.id !== id); this.saveToLocal(); }
                 },
-                
                 getFileIcon(type) {
-                    if (type === 'pdf') return 'fa-solid fa-file-pdf file-icon-pdf';
-                    if (type === 'word') return 'fa-solid fa-file-word file-icon-word';
-                    return 'fa-solid fa-file text-gray-400';
+                    return type === 'pdf' ? 'fa-solid fa-file-pdf file-icon-pdf' : (type === 'word' ? 'fa-solid fa-file-word file-icon-word' : 'fa-solid fa-file text-gray-400');
                 }
             }))
         });
     </script>
-    
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    // Registration was successful
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, function(err) {
-                    // registration failed :(
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
-    </script>
-    </body>
-</html>
+</body>
+</html>\
