@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHFR Resource Dashboard (Local)</title>
+    <title>PHFR Resource Dashboard (Local - Config Embedded)</title>
     
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#111827">
@@ -214,7 +214,7 @@
                                 </div>
                                 <div class="col-span-4">
                                     <input type="text" x-model="link.name" class="w-full text-sm border-gray-300 rounded border p-1" placeholder="Button Name">
-                                </div>
+                                }
                                 <div class="col-span-7">
                                     <input type="text" x-model="link.url" class="w-full text-sm border-gray-300 rounded border p-1" placeholder="https://...">
                                 </div>
@@ -233,6 +233,42 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        // The embedded configuration data from phfr_dashboard_config (2).json
+        const EMBEDDED_PHFR_CONFIG = {
+            "links": [
+                { "name": "Dispatch Center", "icon": "fa-solid fa-headset", "url": "https://www.google.com" },
+                { "name": "Weather Radar", "icon": "fa-solid fa-cloud-sun-rain", "url": "#" },
+                { "name": "Traffic Cams", "icon": "fa-solid fa-road", "url": "#" },
+                { "name": "Protocol Portal", "icon": "fa-solid fa-book-medical", "url": "#" },
+                { "name": "Hospital Status", "icon": "fa-solid fa-hospital", "url": "#" },
+                { "name": "Staff Schedule", "icon": "fa-solid fa-calendar-days", "url": "#" },
+                { "name": "HazMat Guide", "icon": "fa-solid fa-triangle-exclamation", "url": "#" },
+                { "name": "Training LMS", "icon": "fa-solid fa-graduation-cap", "url": "#" },
+                { "name": "Fleet Maint.", "icon": "fa-solid fa-wrench", "url": "#" },
+                { "name": "Dept Email", "icon": "fa-solid fa-envelope", "url": "#" },
+                { "name": "Morning Roll Call", "icon": "fa-solid fa-clipboard-user", "url": "#" },
+                { "name": "Station Log", "icon": "fa-solid fa-book", "url": "#" },
+                { "name": "Hydrant Map", "icon": "fa-solid fa-map-location-dot", "url": "#" },
+                { "name": "Mechanic Request", "icon": "fa-solid fa-screwdriver-wrench", "url": "#" },
+                { "name": "Union Rep", "icon": "fa-solid fa-users", "url": "#" }
+            ],
+            "allFiles": [
+                { "id": "sys1", "name": "PHFR Exposure Control Plan", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR Exposure Control Plan revision 10-2022 (1).pdf" },
+                { "id": "sys2", "name": "Officer Clipboard - Fire Watch", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Fire Watch Requirements.pdf" },
+                { "id": "sys3", "name": "Officer Clipboard - Witness Forms", "category": "Fire", "type": "word", "url": "Fire_Resources/PHFR - Officer Clipboard - Witness Forms.docx" },
+                { "id": "sys4", "name": "Elderlinks Referral Form", "category": "EMS", "type": "pdf", "url": "Fire_Resources/Elderlinks_referral_form.pdf" },
+                { "id": "sys5", "name": "Division of EMS - Incident Report", "category": "EMS", "type": "word", "url": "Fire_Resources/Division of EMS - Incident Report.docx" },
+                { "id": "sys6", "name": "On Scene Personnel List", "category": "Fire", "type": "word", "url": "Fire_Resources/PHFR - Officer Clipboard - On Scene Personnel 2023-11.docx" },
+                { "id": "sys7", "name": "Infectious Exposure Form", "category": "EMS", "type": "pdf", "url": "Fire_Resources/PHFR_InfectiousExposureForm.pdf" },
+                { "id": "sys8", "name": "Officer Clipboard - Staging Worksheet", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Staging Worksheet.pdf" },
+                { "id": "sys9", "name": "Officer Clipboard - Fire Watch Log", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Fire Watch Log.pdf" },
+                { "id": "sys10", "name": "Officer Clipboard - Open Burning", "category": "Fire", "type": "pdf", "url": "Fire_Resources/PHFR - Officer Clipboard - Open Burning Policy.pdf" }
+            ],
+            "exportedAt": "2/2/2026" // Retaining metadata from export
+        };
+    </script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('appData', () => ({
@@ -242,38 +278,18 @@
                 showLinkModal: false,
                 links: [],
                 allFiles: [],
-                defaultLinks: [
-                    { name: 'Dispatch Center', icon: 'fa-solid fa-headset', url: 'https://www.google.com' },
-                    { name: 'Weather Radar', icon: 'fa-solid fa-cloud-sun-rain', url: '#' },
-                    { name: 'Traffic Cams', icon: 'fa-solid fa-road', url: '#' },
-                    { name: 'Protocol Portal', icon: 'fa-solid fa-book-medical', url: '#' },
-                    { name: 'Hospital Status', icon: 'fa-solid fa-hospital', url: '#' },
-                    { name: 'Staff Schedule', icon: 'fa-solid fa-calendar-days', url: '#' },
-                    { name: 'HazMat Guide', icon: 'fa-solid fa-triangle-exclamation', url: '#' },
-                    { name: 'Training LMS', icon: 'fa-solid fa-graduation-cap', url: '#' },
-                    { name: 'Fleet Maint.', icon: 'fa-solid fa-wrench', url: '#' },
-                    { name: 'Dept Email', icon: 'fa-solid fa-envelope', url: '#' },
-                    { name: 'Morning Roll Call', icon: 'fa-solid fa-clipboard-user', url: '#' },
-                    { name: 'Station Log', icon: 'fa-solid fa-book', url: '#' },
-                    { name: 'Hydrant Map', icon: 'fa-solid fa-map-location-dot', url: '#' },
-                    { name: 'Mechanic Request', icon: 'fa-solid fa-screwdriver-wrench', url: '#' },
-                    { name: 'Union Rep', icon: 'fa-solid fa-users', url: '#' },
-                ],
-                defaultFiles: [
-                    { id: 'sys1', name: 'PHFR Exposure Control Plan', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR Exposure Control Plan revision 10-2022 (1).pdf' },
-                    { id: 'sys2', name: 'Officer Clipboard - Fire Watch', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Fire Watch Requirements.pdf' },
-                    { id: 'sys3', name: 'Officer Clipboard - Witness Forms', category: 'Fire', type: 'word', url: 'Fire_Resources/PHFR - Officer Clipboard - Witness Forms.docx' },
-                    { id: 'sys4', name: 'Elderlinks Referral Form', category: 'EMS', type: 'pdf', url: 'Fire_Resources/Elderlinks_referral_form.pdf' },
-                    { id: 'sys5', name: 'Division of EMS - Incident Report', category: 'EMS', type: 'word', url: 'Fire_Resources/Division of EMS - Incident Report.docx' },
-                    { id: 'sys6', name: 'On Scene Personnel List', category: 'Fire', type: 'word', url: 'Fire_Resources/PHFR - Officer Clipboard - On Scene Personnel 2023-11.docx' },
-                    { id: 'sys7', name: 'Infectious Exposure Form', category: 'EMS', type: 'pdf', url: 'Fire_Resources/PHFR_InfectiousExposureForm.pdf' },
-                    { id: 'sys8', name: 'Officer Clipboard - Staging Worksheet', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Staging Worksheet.pdf' },
-                    { id: 'sys9', name: 'Officer Clipboard - Fire Watch Log', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Fire Watch Log.pdf' },
-                    { id: 'sys10', name: 'Officer Clipboard - Open Burning', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Open Burning Policy.pdf' },
-                ],
+                
+                // Keep default backups (factory settings)
+                defaultLinks: EMBEDDED_PHFR_CONFIG.links, // Used for master reset backup
+                defaultFiles: EMBEDDED_PHFR_CONFIG.allFiles, // Used for master reset backup
+
                 newFile: { name: '', category: 'Fire', path: '', type: '' },
+                
                 init() {
                     this.loadFromLocal();
+                    
+                    // --- DATA MIGRATION FIX ---
+                    // Ensure all files have valid IDs
                     let dirty = false;
                     this.allFiles = this.allFiles.map(f => {
                         if (!f.id) {
@@ -284,13 +300,16 @@
                     });
                     if (dirty) this.saveToLocal();
                 },
+                
+                // --- DATA PERSISTENCE ---
+
                 loadFromLocal() {
                     const savedData = localStorage.getItem('phfr_data_v2'); 
                     if (savedData) {
                         try {
                             const parsed = JSON.parse(savedData);
-                            this.links = parsed.links || this.defaultLinks;
-                            this.allFiles = parsed.allFiles || this.defaultFiles;
+                            this.links = parsed.links || EMBEDDED_PHFR_CONFIG.links;
+                            this.allFiles = parsed.allFiles || EMBEDDED_PHFR_CONFIG.allFiles;
                         } catch(e) { 
                             console.error('Error loading data', e); 
                             this.restoreDefaults(); 
@@ -299,17 +318,23 @@
                         this.restoreDefaults();
                     }
                 },
+
                 saveToLocal() {
                     localStorage.setItem('phfr_data_v2', JSON.stringify({
                         links: this.links,
                         allFiles: this.allFiles
                     }));
                 },
+
                 restoreDefaults() {
-                    this.links = JSON.parse(JSON.stringify(this.defaultLinks));
-                    this.allFiles = JSON.parse(JSON.stringify(this.defaultFiles));
+                    // Restore from the EMBEDDED config instead of the hardcoded defaultLinks/defaultFiles
+                    this.links = JSON.parse(JSON.stringify(EMBEDDED_PHFR_CONFIG.links));
+                    this.allFiles = JSON.parse(JSON.stringify(EMBEDDED_PHFR_CONFIG.allFiles));
                     this.saveToLocal();
                 },
+                
+                // --- EXPORT / IMPORT ---
+
                 exportData() {
                     const data = JSON.stringify({
                         links: this.links,
@@ -325,6 +350,7 @@
                     a.click();
                     document.body.removeChild(a);
                 },
+
                 importData(event) {
                     const file = event.target.files[0];
                     if(!file) return;
@@ -340,7 +366,7 @@
                                         url: (link.url && link.url.length > 0) ? link.url : '#' 
                                     }));
                                 } else {
-                                    this.links = this.defaultLinks;
+                                    this.links = EMBEDDED_PHFR_CONFIG.links;
                                 }
                                 let importedFiles = data.allFiles || [];
                                 importedFiles = importedFiles.map(f => {
@@ -358,19 +384,26 @@
                     reader.readAsText(file);
                     event.target.value = ''; 
                 },
+                
+                // --- MASTER RESET ---
+                
                 masterReset() {
-                    if(confirm("MASTER RESET: This will DELETE all your custom links and files and restore the original factory settings. Are you sure?")) {
+                    if(confirm("MASTER RESET: This will DELETE all your custom links and files and restore the original embedded settings. Are you sure?")) {
                         localStorage.removeItem('phfr_data_v2');
+                        // No need to manually restoreDefaults(); reload will trigger loadFromLocal() which calls restoreDefaults() when no saved data is found.
                         location.reload();
                     }
                 },
+                
                 saveLinks() {
                     this.saveToLocal();
                     this.showLinkModal = false;
                 },
+                
                 getFiles(category) {
                     return this.allFiles.filter(f => f.category === category);
                 },
+                
                 handleFileSelect(event) {
                     const file = event.target.files[0];
                     if (file) {
@@ -382,6 +415,7 @@
                         else this.newFile.type = 'other';
                     }
                 },
+                
                 addFile() {
                     if (!this.newFile.name || !this.newFile.path) {
                         alert("Please provide a name and path.");
@@ -400,6 +434,7 @@
                     this.showUploadModal = false;
                     this.currentTab = newDoc.category.toLowerCase();
                 },
+                
                 deleteFile(fileId) {
                     if (!fileId) {
                         alert("Error: Cannot delete file (Missing ID). Please refresh the page to fix this file.");
@@ -413,6 +448,7 @@
                         this.saveToLocal();
                     }
                 },
+                
                 getFileIcon(type) {
                     if (type === 'pdf') return 'fa-solid fa-file-pdf file-icon-pdf';
                     if (type === 'word') return 'fa-solid fa-file-word file-icon-word';
