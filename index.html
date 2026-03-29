@@ -1,385 +1,491 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Medical Command | Timer Controls</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHFR Resource Dashboard (Local)</title>
+    
+    <link rel="icon" type="image/png" href="image_2.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        .glass-panel { background: rgba(31, 41, 55, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .triage-border-Red { border-left: 6px solid #ef4444; }
-        .triage-border-Yellow { border-left: 6px solid #eab308; }
-        .triage-border-Green { border-left: 6px solid #22c55e; }
-        .triage-border-Black { border-left: 6px solid #4b5563; }
-        
-        @keyframes pulse-red {
-            0% { color: #ef4444; }
-            50% { color: #fca5a5; }
-            100% { color: #ef4444; }
-        }
-        .timer-critical { animation: pulse-red 1s infinite; font-weight: 800; }
-        select { appearance: none; }
+        [x-cloak] { display: none !important; }
+        .file-icon-pdf { color: #ef4444; }
+        .file-icon-word { color: #3b82f6; }
+        .mobile-tap-target { min-height: 44px; }
     </style>
 </head>
-<body class="h-full bg-gray-950 text-gray-100 flex flex-col overflow-hidden">
+<body class="bg-gray-100 font-sans text-gray-800" x-data="appData()">
 
-    <div id="modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div class="bg-gray-800 rounded-2xl border border-gray-600 w-full max-w-md p-6 shadow-2xl">
-            <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white italic">
-                🚑 Depart / Transport
-            </h3>
-            
-            <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-700 mb-4">
-                <p class="text-[10px] text-gray-400 uppercase tracking-wide mb-2">Transporting Unit Details</p>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="col-span-1">
-                        <label class="block text-xs text-gray-500 mb-1">Type</label>
-                        <select id="modal-transport-unit-type" class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-2 text-white text-sm">
-                            <option value="Rescue">Rescue</option>
-                            <option value="Engine">Engine</option>
-                            <option value="Truck">Truck</option>
-                            <option value="Squad">Squad</option>
-                            <option value="DC">DC</option>
-                            <option value="LR">LR</option>
-                            <option value="Other">Other</option>
-                        </select>
+    <div class="flex h-screen overflow-hidden">
+
+        <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 lg:hidden" x-cloak></div>
+
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-30 w-64 bg-slate-900 text-white transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl flex flex-col">
+            <div class="flex items-center justify-center h-20 bg-slate-800 border-b border-slate-700">
+                <h1 class="text-2xl font-bold tracking-wider"><i class="fa-solid fa-fire-burner mr-2"></i>PHFR <span class="text-xs bg-red-600 rounded px-1 ml-1">LOCAL</span></h1>
+            </div>
+
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <button @click="currentTab = 'home'; sidebarOpen = false" :class="currentTab === 'home' ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-slate-800 hover:text-white'" class="flex items-center w-full px-4 py-3 rounded-lg transition-colors mobile-tap-target">
+                    <i class="fa-solid fa-house w-6"></i>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+
+                <button @click="currentTab = 'fire'; sidebarOpen = false" :class="currentTab === 'fire' ? 'bg-red-600 text-white' : 'text-gray-400 hover:bg-slate-800 hover:text-white'" class="flex items-center w-full px-4 py-3 rounded-lg transition-colors mobile-tap-target">
+                    <i class="fa-solid fa-fire-extinguisher w-6"></i>
+                    <span class="font-medium">Fire Resources</span>
+                </button>
+
+                <button @click="currentTab = 'ems'; sidebarOpen = false" :class="currentTab === 'ems' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-slate-800 hover:text-white'" class="flex items-center w-full px-4 py-3 rounded-lg transition-colors mobile-tap-target">
+                    <i class="fa-solid fa-heart-pulse w-6"></i>
+                    <span class="font-medium">EMS Resources</span>
+                </button>
+                
+                <div class="pt-4 mt-4 border-t border-slate-700">
+                    <p class="px-4 text-xs text-gray-500 uppercase font-bold mb-2">Data Management</p>
+                    <button @click="exportData()" class="flex items-center w-full px-4 py-2 text-gray-400 hover:bg-slate-800 hover:text-green-400 transition-colors">
+                        <i class="fa-solid fa-download w-6"></i>
+                        <span class="font-medium text-sm">Export Config</span>
+                    </button>
+                     <label class="flex items-center w-full px-4 py-2 text-gray-400 hover:bg-slate-800 hover:text-blue-400 transition-colors cursor-pointer">
+                        <i class="fa-solid fa-upload w-6"></i>
+                        <span class="font-medium text-sm">Import Config</span>
+                        <input type="file" accept=".json" class="hidden" @change="importData">
+                    </label>
+                    <button @click="masterReset()" class="flex items-center w-full px-4 py-2 text-red-400 hover:bg-red-900 hover:text-red-200 transition-colors mt-2">
+                        <i class="fa-solid fa-triangle-exclamation w-6"></i>
+                        <span class="font-medium text-sm">Master Reset</span>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="p-4 border-t border-slate-700">
+                <button @click="showUploadModal = true" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex justify-center items-center gap-2 mobile-tap-target">
+                    <i class="fa-solid fa-plus"></i> Add Document
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="flex items-center justify-between p-4 bg-white shadow lg:hidden">
+                <button @click="sidebarOpen = true" class="text-gray-600 focus:outline-none mobile-tap-target">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+                <span class="font-bold text-lg">PHFR Manager</span>
+                <div class="w-6"></div>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6">
+                
+                <div x-show="currentTab === 'home'" x-cloak>
+                    <div class="flex justify-between items-center mb-6 border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">Quick Links</h2>
+                        <button @click="showLinkModal = true" class="text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Buttons
+                        </button>
                     </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs text-gray-500 mb-1">Unit ID</label>
-                        <input type="text" id="modal-transport-unit-id" class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white font-bold uppercase text-sm">
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <template x-for="link in links" :key="link.name">
+                            <a :href="link.url" target="_blank" class="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md hover:bg-red-50 transition border border-gray-200 cursor-pointer h-32 text-center group relative">
+                                <i :class="link.icon" class="text-3xl mb-3 text-slate-600 group-hover:text-red-600 transition-colors"></i>
+                                <span class="font-semibold text-sm text-gray-700" x-text="link.name"></span>
+                            </a>
+                        </template>
                     </div>
                 </div>
-            </div>
-            
-            <div class="mb-4 bg-gray-700/30 p-3 rounded-lg border border-gray-600 flex items-center gap-3">
-                <input type="checkbox" id="modal-refusal" class="w-6 h-6 text-blue-600 rounded bg-gray-800 border-gray-500">
-                <label for="modal-refusal" class="text-sm font-bold text-white cursor-pointer select-none">Patient Refusal (No Transport)</label>
-            </div>
 
-            <div class="mb-6">
-                <label class="block text-xs text-gray-400 mb-1">Destination Hospital</label>
-                <select id="modal-destination" class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white text-base">
-                </select>
-            </div>
+                <div x-show="currentTab === 'fire'" x-cloak>
+                    <div class="flex justify-between items-center mb-6 border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">Fire Documents</h2>
+                        <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="getFiles('Fire').length + ' Files'"></span>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <ul class="divide-y divide-gray-200">
+                            <template x-for="file in getFiles('Fire')" :key="file.id">
+                                <li class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:bg-gray-50 gap-4">
+                                    <div class="flex items-center overflow-hidden">
+                                        <i :class="getFileIcon(file.type)" class="text-2xl mr-4 flex-shrink-0"></i>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-gray-900 truncate" x-text="file.name"></p>
+                                            <p class="text-xs text-gray-500" x-text="file.path"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2 flex-shrink-0">
+                                        <a :href="file.url" target="_blank" class="flex items-center justify-center bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-medium text-sm px-4 py-2 rounded shadow-sm transition-colors">
+                                            <i class="fa-solid fa-folder-open mr-2"></i> Open
+                                        </a>
+                                        <button @click="deleteFile(file.id)" class="flex items-center justify-center bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 font-medium text-sm px-3 py-2 rounded shadow-sm transition-colors" title="Delete Link">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            </template>
+                             <li x-show="getFiles('Fire').length === 0" class="p-8 text-center text-gray-500">
+                                No Fire documents found. Add some using the sidebar button.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 rounded-xl transition-colors">Cancel</button>
-                <button id="modal-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow transition-colors">Confirm</button>
+                <div x-show="currentTab === 'ems'" x-cloak>
+                    <div class="flex justify-between items-center mb-6 border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">EMS Documents</h2>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded" x-text="getFiles('EMS').length + ' Files'"></span>
+                    </div>
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <ul class="divide-y divide-gray-200">
+                            <template x-for="file in getFiles('EMS')" :key="file.id">
+                                <li class="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:bg-gray-50 gap-4">
+                                    <div class="flex items-center overflow-hidden">
+                                        <i :class="getFileIcon(file.type)" class="text-2xl mr-4 flex-shrink-0"></i>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-gray-900 truncate" x-text="file.name"></p>
+                                            <p class="text-xs text-gray-500" x-text="file.path"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2 flex-shrink-0">
+                                        <a :href="file.url" target="_blank" class="flex items-center justify-center bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-medium text-sm px-4 py-2 rounded shadow-sm transition-colors">
+                                            <i class="fa-solid fa-folder-open mr-2"></i> Open
+                                        </a>
+                                        <button @click="deleteFile(file.id)" class="flex items-center justify-center bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 font-medium text-sm px-3 py-2 rounded shadow-sm transition-colors" title="Delete Link">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            </template>
+                            <li x-show="getFiles('EMS').length === 0" class="p-8 text-center text-gray-500">
+                                No EMS documents found. Add some using the sidebar button.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div x-show="showUploadModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showUploadModal" class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showUploadModal = false"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div x-show="showUploadModal" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Add Local File Reference</h3>
+                    <div class="mt-2 bg-yellow-50 border-l-4 border-yellow-400 p-3">
+                        <p class="text-xs text-yellow-700">
+                            <strong>Note:</strong> Since this is offline, you must manually place the file in the <code class="bg-yellow-100 px-1 rounded">documents</code> folder on your drive before adding it here.
+                        </p>
+                    </div>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                            <input type="text" x-model="newFile.name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="e.g. New Protocols 2026">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Category</label>
+                            <select x-model="newFile.category" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-red-500 sm:text-sm rounded-md">
+                                <option value="Fire">Fire</option>
+                                <option value="EMS">EMS</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Select File (to get filename)</label>
+                            <input type="file" @change="handleFileSelect" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">File Path (Relative)</label>
+                            <input type="text" x-model="newFile.path" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-50 text-gray-600 sm:text-sm">
+                            <p class="text-xs text-gray-400 mt-1">Ensure the file is actually at this location.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="addFile()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Add Reference
+                    </button>
+                    <button @click="showUploadModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <header class="bg-gray-900 border-b border-gray-800 p-2 lg:p-3">
-        <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row gap-3 items-center">
-            <div class="flex items-center gap-4 shrink-0">
-                <h1 class="text-lg font-black tracking-tighter uppercase italic text-red-500">Med-Command</h1>
-                <div class="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded border border-gray-700">
-                    <div>
-                        <span class="text-[9px] text-gray-500 block leading-none">INCIDENT TIME</span>
-                        <span id="global-timer" class="text-sm font-mono font-bold text-white leading-none">00:00:00</span>
+    <div x-show="showLinkModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-cloak>
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showLinkModal" class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showLinkModal = false"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div x-show="showLinkModal" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4" id="modal-title">Edit Quick Links</h3>
+                    
+                    <div class="max-h-96 overflow-y-auto pr-2">
+                        <template x-for="(link, index) in links" :key="index">
+                            <div class="grid grid-cols-12 gap-2 mb-3 items-center bg-gray-50 p-2 rounded">
+                                <div class="col-span-1 text-center text-gray-400">
+                                    <i :class="link.icon"></i>
+                                </div>
+                                <div class="col-span-4">
+                                    <input type="text" x-model="link.name" class="w-full text-sm border-gray-300 rounded border p-1" placeholder="Button Name">
+                                </div>
+                                <div class="col-span-7">
+                                    <input type="text" x-model="link.url" class="w-full text-sm border-gray-300 rounded border p-1" placeholder="https://...">
+                                </div>
+                            </div>
+                        </template>
                     </div>
-                    <div class="flex gap-1 border-l border-gray-700 ml-2 pl-2">
-                        <button onclick="startIncidentTimer()" class="text-xs hover:text-green-500">▶️</button>
-                        <button onclick="stopIncidentTimer()" class="text-xs hover:text-yellow-500">⏸️</button>
-                        <button onclick="resetIncidentTimer()" class="text-xs hover:text-red-500">🔄</button>
-                    </div>
+
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="saveLinks()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Save Changes
+                    </button>
+                    <button @click="showLinkModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
                 </div>
             </div>
-            <div class="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-2">
-                <input type="text" id="incident-address" placeholder="Address" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
-                <input type="text" id="incident-number" placeholder="Inc #" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
-                <input type="text" id="incident-channel" placeholder="Radio" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
-                <input type="text" id="med-officer" placeholder="Med Officer" class="bg-gray-800 border-none rounded-md px-3 py-1.5 text-sm" />
-            </div>
-        </div>
-    </header>
-
-    <div class="bg-gray-900/50 border-b border-gray-800 overflow-x-auto">
-        <div class="flex p-2 gap-2 min-w-max md:justify-around max-w-[1600px] mx-auto text-center">
-            <div class="px-6"><div class="text-[10px] text-gray-500 uppercase">Pts</div><div class="font-bold text-blue-400" id="total-patients">0</div></div>
-            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-red-500 uppercase">Red</div><div class="font-bold text-red-500" id="total-red">0</div></div>
-            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-yellow-500 uppercase">Yel</div><div class="font-bold text-yellow-500" id="total-yellow">0</div></div>
-            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-green-500 uppercase">Grn</div><div class="font-bold text-green-500" id="total-green">0</div></div>
-            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-gray-400 uppercase">Blk</div><div class="font-bold text-gray-400" id="total-black">0</div></div>
-            <div class="px-6 border-l border-gray-800"><div class="text-[10px] text-gray-500 uppercase">Ref</div><div class="font-bold text-gray-300" id="total-refusals">0</div></div>
         </div>
     </div>
-
-    <main class="flex-1 overflow-hidden flex flex-col md:flex-row p-2 lg:p-4 gap-4">
-        <div class="flex-1 flex flex-col gap-4 overflow-hidden">
-            <section class="glass-panel rounded-2xl p-4">
-                <form id="entry-form" class="grid grid-cols-12 gap-3">
-                    <div class="col-span-4 md:col-span-2">
-                        <select id="unit-type" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm">
-                            <option value="Rescue">Rescue</option><option value="Engine">Engine</option><option value="Truck">Truck</option><option value="Squad">Squad</option>
-                        </select>
-                    </div>
-                    <div class="col-span-8 md:col-span-3">
-                        <input type="text" id="unit-id" placeholder="Unit ID" required class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 font-bold uppercase">
-                    </div>
-                    <div class="col-span-4 md:col-span-2">
-                        <input type="number" id="patient-count" value="1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center font-bold">
-                    </div>
-                    <div class="col-span-8 md:col-span-3">
-                        <select id="triage-cat" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 font-bold text-orange-400">
-                            <option value="Red">RED</option><option value="Yellow">YELLOW</option><option value="Green">GREEN</option><option value="Black">BLACK</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="col-span-12 md:col-span-2 bg-orange-600 font-black py-3 rounded-lg active:scale-95 transition-transform">ASSIGN</button>
-                </form>
-            </section>
-
-            <section class="flex-1 glass-panel rounded-2xl flex flex-col overflow-hidden">
-                <div class="p-3 border-b border-gray-800 bg-gray-900/40">
-                    <h2 class="font-bold text-orange-400 text-xs tracking-widest uppercase">Active Scene</h2>
-                </div>
-                <div id="active-list" class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll"></div>
-            </section>
-        </div>
-
-        <section class="w-full md:w-96 glass-panel rounded-2xl flex flex-col overflow-hidden">
-            <div class="p-3 border-b border-gray-800 bg-gray-900/40 flex justify-between">
-                <h2 class="font-bold text-green-500 text-xs tracking-widest uppercase">Transport Log</h2>
-                <button onclick="exportToCSV()" class="text-[10px] text-blue-400 font-bold uppercase">Export CSV</button>
-            </div>
-            <div id="transport-log" class="flex-1 overflow-y-auto p-2 space-y-2 custom-scroll bg-black/10"></div>
-        </section>
-    </main>
 
     <script>
-        const hospitalList = ["All Children's Hospital", "Bayfront Health of St Petersburg", "HCA FL Bayonet Point Hospital", "HCA FL Blake Hospital - Manatee", "Sarasota Memorial - Sarasota", "St. Joseph's Hosp - Hillsborough", "Tampa General Hosp- Hillsborough", "AdventHealth of North Pinellas", "AdventHealth Palm Harbor ER", "Bardmoor Emergency Center", "Bay Pines VA Hospital", "Bayfront Health ER - Crossroads", "Bayfront Health ER - Pinellas Park", "Eleos (PEHMS)", "HCA FL Clearwater Emergency", "HCA FL Lake Tarpon Emergency", "HCA FL Largo Hospital", "HCA FL Largo West Hospital", "HCA FL Northside Hospital", "HCA FL Pasadena Hospital", "HCA FL St. Petersburg Hospital", "HCA FL Trinity Hospital", "HCA FL West Tampa Hospital", "Mease Countryside Hospital", "Mease Dunedin Hospital", "Morton Plant Hospital", "St. Anthony's Hospital", "St. Joseph's Hospital - Tampa", "Tampa General Hospital - Tampa"];
-
-        let activeUnits = [];
-        let transportHistory = [];
-        let currentTransportId = null;
-        
-        // Timer Logic
-        let incidentTimer = null;
-        let globalSeconds = 0;
-        let isTimerRunning = false;
-
-        (function() {
-            const destSelect = document.getElementById('modal-destination');
-            destSelect.innerHTML = '<option value="">-- Select Hospital --</option>' + 
-                hospitalList.map(h => `<option value="${h}">${h}</option>`).join('');
-            
-            setInterval(updateUnitTimers, 1000);
-            document.getElementById('modal-confirm-btn').addEventListener('click', confirmTransport);
-        })();
-
-        // GLOBAL TIMER FUNCTIONS
-        function startIncidentTimer() {
-            if (isTimerRunning) return;
-            isTimerRunning = true;
-            incidentTimer = setInterval(() => {
-                globalSeconds++;
-                updateGlobalDisplay();
-            }, 1000);
-        }
-
-        function stopIncidentTimer() {
-            isTimerRunning = false;
-            clearInterval(incidentTimer);
-        }
-
-        function resetIncidentTimer() {
-            if (confirm("Reset Global Incident Timer?")) {
-                stopIncidentTimer();
-                globalSeconds = 0;
-                updateGlobalDisplay();
-            }
-        }
-
-        function updateGlobalDisplay() {
-            const h = Math.floor(globalSeconds / 3600);
-            const m = Math.floor((globalSeconds % 3600) / 60);
-            const s = globalSeconds % 60;
-            document.getElementById('global-timer').innerText = 
-                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        }
-
-        function updateUnitTimers() {
-            const now = Date.now();
-            activeUnits.forEach(u => {
-                const elapsedSec = Math.floor((now - u.assignedTimestamp) / 1000);
-                const min = Math.floor(elapsedSec / 60);
-                const sec = elapsedSec % 60;
-                const timerStr = `${min}:${sec.toString().padStart(2, '0')}`;
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appData', () => ({
+                sidebarOpen: false,
+                currentTab: 'home',
+                showUploadModal: false,
+                showLinkModal: false,
                 
-                const timerEl = document.getElementById(`timer-${u.id}`);
-                if (timerEl) {
-                    timerEl.innerText = timerStr;
-                    if (min >= 20) timerEl.className = "timer-critical";
-                    else if (min >= 15) timerEl.className = "text-yellow-500 font-bold";
-                    else timerEl.className = "text-gray-400 text-xs font-mono";
+                // Active State
+                links: [],
+                allFiles: [],
+                
+                // --- FACTORY DEFAULTS ---
+                // Total 15 buttons
+                defaultLinks: [
+                    { name: 'Dispatch Center', icon: 'fa-solid fa-headset', url: 'https://www.google.com' },
+                    { name: 'Weather Radar', icon: 'fa-solid fa-cloud-sun-rain', url: '#' },
+                    { name: 'Traffic Cams', icon: 'fa-solid fa-road', url: '#' },
+                    { name: 'Protocol Portal', icon: 'fa-solid fa-book-medical', url: '#' },
+                    { name: 'Hospital Status', icon: 'fa-solid fa-hospital', url: '#' },
+                    { name: 'Staff Schedule', icon: 'fa-solid fa-calendar-days', url: '#' },
+                    { name: 'HazMat Guide', icon: 'fa-solid fa-triangle-exclamation', url: '#' },
+                    { name: 'Training LMS', icon: 'fa-solid fa-graduation-cap', url: '#' },
+                    { name: 'Fleet Maint.', icon: 'fa-solid fa-wrench', url: '#' },
+                    { name: 'Dept Email', icon: 'fa-solid fa-envelope', url: '#' },
+                    { name: 'Morning Roll Call', icon: 'fa-solid fa-clipboard-user', url: '#' },
+                    { name: 'Station Log', icon: 'fa-solid fa-book', url: '#' },
+                    { name: 'Hydrant Map', icon: 'fa-solid fa-map-location-dot', url: '#' },
+                    { name: 'Mechanic Request', icon: 'fa-solid fa-screwdriver-wrench', url: '#' },
+                    { name: 'Union Rep', icon: 'fa-solid fa-users', url: '#' },
+                ],
+
+                defaultFiles: [
+                    { id: 'sys1', name: 'PHFR Exposure Control Plan', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR Exposure Control Plan revision 10-2022 (1).pdf' },
+                    { id: 'sys2', name: 'Officer Clipboard - Fire Watch', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Fire Watch Requirements.pdf' },
+                    { id: 'sys3', name: 'Officer Clipboard - Witness Forms', category: 'Fire', type: 'word', url: 'Fire_Resources/PHFR - Officer Clipboard - Witness Forms.docx' },
+                    { id: 'sys4', name: 'Elderlinks Referral Form', category: 'EMS', type: 'pdf', url: 'Fire_Resources/Elderlinks_referral_form.pdf' },
+                    { id: 'sys5', name: 'Division of EMS - Incident Report', category: 'EMS', type: 'word', url: 'Fire_Resources/Division of EMS - Incident Report.docx' },
+                    { id: 'sys6', name: 'On Scene Personnel List', category: 'Fire', type: 'word', url: 'Fire_Resources/PHFR - Officer Clipboard - On Scene Personnel 2023-11.docx' },
+                    { id: 'sys7', name: 'Infectious Exposure Form', category: 'EMS', type: 'pdf', url: 'Fire_Resources/PHFR_InfectiousExposureForm.pdf' },
+                    { id: 'sys8', name: 'Officer Clipboard - Staging Worksheet', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Staging Worksheet.pdf' },
+                    { id: 'sys9', name: 'Officer Clipboard - Fire Watch Log', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Fire Watch Log.pdf' },
+                    { id: 'sys10', name: 'Officer Clipboard - Open Burning', category: 'Fire', type: 'pdf', url: 'Fire_Resources/PHFR - Officer Clipboard - Open Burning Policy.pdf' },
+                ],
+
+                newFile: { name: '', category: 'Fire', path: '', type: '' },
+
+                init() {
+                    this.loadFromLocal();
+                    
+                    // --- DATA MIGRATION FIX ---
+                    let dirty = false;
+                    this.allFiles = this.allFiles.map(f => {
+                        if (!f.id) {
+                            f.id = 'doc_' + Math.random().toString(36).substr(2, 9);
+                            dirty = true;
+                        }
+                        return f;
+                    });
+                    if (dirty) this.saveToLocal();
+                },
+
+                // --- DATA PERSISTENCE ---
+
+                loadFromLocal() {
+                    const savedData = localStorage.getItem('phfr_data_v2'); 
+                    if (savedData) {
+                        try {
+                            const parsed = JSON.parse(savedData);
+                            this.links = parsed.links || this.defaultLinks;
+                            this.allFiles = parsed.allFiles || this.defaultFiles;
+                        } catch(e) { 
+                            console.error('Error loading data', e); 
+                            this.restoreDefaults(); 
+                        }
+                    } else {
+                        this.restoreDefaults();
+                    }
+                },
+
+                saveToLocal() {
+                    localStorage.setItem('phfr_data_v2', JSON.stringify({
+                        links: this.links,
+                        allFiles: this.allFiles
+                    }));
+                },
+
+                restoreDefaults() {
+                    this.links = JSON.parse(JSON.stringify(this.defaultLinks));
+                    this.allFiles = JSON.parse(JSON.stringify(this.defaultFiles));
+                    this.saveToLocal();
+                },
+
+                // --- EXPORT / IMPORT ---
+
+                exportData() {
+                    const data = JSON.stringify({
+                        links: this.links,
+                        allFiles: this.allFiles,
+                        exportedAt: new Date().toLocaleDateString()
+                    });
+                    const blob = new Blob([data], {type: 'application/json'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'phfr_dashboard_config.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                },
+
+                importData(event) {
+                    const file = event.target.files[0];
+                    if(!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if(confirm("This will overwrite your current dashboard settings. Continue?")) {
+                                // SAFE IMPORT: Fixes broken or empty links
+                                if(Array.isArray(data.links)) {
+                                    this.links = data.links.map(link => ({
+                                        name: link.name || 'Untitled',
+                                        // Auto-repair missing icons
+                                        icon: (link.icon && link.icon.length > 5) ? link.icon : 'fa-solid fa-link', 
+                                        // Auto-repair missing URLs
+                                        url: (link.url && link.url.length > 0) ? link.url : '#' 
+                                    }));
+                                } else {
+                                    this.links = this.defaultLinks;
+                                }
+                                
+                                let importedFiles = data.allFiles || [];
+                                importedFiles = importedFiles.map(f => {
+                                    if(!f.id) f.id = 'doc_' + Math.random().toString(36).substr(2, 9);
+                                    return f;
+                                });
+                                
+                                this.allFiles = importedFiles;
+                                this.saveToLocal();
+                                alert('Configuration loaded successfully!');
+                            }
+                        } catch(err) {
+                            alert('Invalid configuration file.');
+                        }
+                    };
+                    reader.readAsText(file);
+                    event.target.value = ''; 
+                },
+
+                // --- MASTER RESET ---
+                
+                masterReset() {
+                    if(confirm("MASTER RESET: This will DELETE all your custom links and files and restore the original factory settings (Including new Morning Roll Call button). Are you sure?")) {
+                        localStorage.removeItem('phfr_data_v2');
+                        location.reload();
+                    }
+                },
+
+                // --- APP LOGIC ---
+
+                saveLinks() {
+                    this.saveToLocal();
+                    this.showLinkModal = false;
+                },
+
+                getFiles(category) {
+                    return this.allFiles.filter(f => f.category === category);
+                },
+
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const fileName = file.name;
+                        
+                        if(!this.newFile.name) this.newFile.name = fileName.split('.')[0];
+                        this.newFile.path = 'documents/' + fileName;
+                        
+                        if(fileName.toLowerCase().includes('.pdf')) this.newFile.type = 'pdf';
+                        else if(fileName.toLowerCase().includes('.doc')) this.newFile.type = 'word';
+                        else this.newFile.type = 'other';
+                    }
+                },
+
+                addFile() {
+                    if (!this.newFile.name || !this.newFile.path) {
+                        alert("Please provide a name and path.");
+                        return;
+                    }
+
+                    const newDoc = {
+                        id: 'doc_' + Date.now() + Math.floor(Math.random() * 1000),
+                        name: this.newFile.name,
+                        category: this.newFile.category,
+                        type: this.newFile.type || 'other',
+                        url: this.newFile.path
+                    };
+
+                    this.allFiles.push(newDoc);
+                    this.saveToLocal();
+
+                    this.newFile = { name: '', category: 'Fire', path: '', type: '' };
+                    this.showUploadModal = false;
+                    this.currentTab = newDoc.category.toLowerCase();
+                },
+
+                deleteFile(fileId) {
+                    if (!fileId) {
+                        alert("Error: Cannot delete file (Missing ID). Please refresh the page to fix this file.");
+                        return;
+                    }
+
+                    const fileToRemove = this.allFiles.find(f => f.id === fileId);
+                    if (!fileToRemove) return;
+
+                    if (confirm(`Remove link to "${fileToRemove.name}"?`)) {
+                        const filtered = this.allFiles.filter(f => f.id !== fileId);
+                        this.allFiles = [...filtered];
+                        this.saveToLocal();
+                    }
+                },
+
+                getFileIcon(type) {
+                    if (type === 'pdf') return 'fa-solid fa-file-pdf file-icon-pdf';
+                    if (type === 'word') return 'fa-solid fa-file-word file-icon-word';
+                    return 'fa-solid fa-file text-gray-400';
                 }
-            });
-        }
-
-        function updateTriage(listType, id, newTriage) {
-            const list = listType === 'active' ? activeUnits : transportHistory;
-            const item = list.find(u => u.id === id);
-            if (item) {
-                item.triageCategory = newTriage;
-                renderAll();
-            }
-        }
-
-        function returnToScene(id) {
-            const idx = transportHistory.findIndex(u => u.id === id);
-            if (idx !== -1) {
-                const unit = transportHistory.splice(idx, 1)[0];
-                unit.destination = null;
-                unit.transportTime = null;
-                activeUnits.push(unit);
-                renderAll();
-            }
-        }
-
-        document.getElementById('entry-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Start Global Timer on first assignment
-            if (!isTimerRunning && globalSeconds === 0) startIncidentTimer();
-
-            activeUnits.push({
-                id: Date.now(),
-                assignedTimestamp: Date.now(),
-                unitType: document.getElementById('unit-type').value,
-                unitId: document.getElementById('unit-id').value.toUpperCase(),
-                patientCount: parseInt(document.getElementById('patient-count').value) || 0,
-                triageCategory: document.getElementById('triage-cat').value,
-                destination: null,
-                transportTime: null
-            });
-            document.getElementById('unit-id').value = '';
-            renderAll();
+            }))
         });
-
-        function renderAll() {
-            const activeListEl = document.getElementById('active-list');
-            activeListEl.innerHTML = activeUnits.length === 0 ? '<div class="text-center text-gray-600 py-8 italic text-sm">No units assigned.</div>' : '';
-            activeUnits.forEach(u => {
-                const div = document.createElement('div');
-                div.className = `bg-gray-800 p-3 rounded-xl flex items-center gap-3 triage-border-${u.triageCategory}`;
-                div.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-black text-lg uppercase">${u.unitId}</span>
-                            <span id="timer-${u.id}" class="text-xs text-gray-500 font-mono">0:00</span>
-                        </div>
-                        <div class="text-[10px] text-gray-500 font-bold">${u.unitType} • ${u.patientCount} PTS</div>
-                    </div>
-                    <select onchange="updateTriage('active', ${u.id}, this.value)" class="bg-gray-900 text-xs font-bold p-2 rounded border border-gray-700">
-                        <option value="Red" ${u.triageCategory==='Red'?'selected':''}>RED</option>
-                        <option value="Yellow" ${u.triageCategory==='Yellow'?'selected':''}>YELLOW</option>
-                        <option value="Green" ${u.triageCategory==='Green'?'selected':''}>GREEN</option>
-                        <option value="Black" ${u.triageCategory==='Black'?'selected':''}>BLACK</option>
-                    </select>
-                    <button onclick="openTransportModal(${u.id})" class="bg-blue-600 px-4 py-2 rounded-lg font-bold text-xs uppercase active:scale-95 transition-transform">Depart</button>
-                `;
-                activeListEl.appendChild(div);
-            });
-
-            const transportLogEl = document.getElementById('transport-log');
-            transportLogEl.innerHTML = transportHistory.length === 0 ? '<div class="text-center text-gray-600 py-8 italic text-sm">No transports logged.</div>' : '';
-            transportHistory.forEach(t => {
-                const div = document.createElement('div');
-                div.className = `bg-gray-900 p-3 rounded-lg border border-gray-800 triage-border-${t.triageCategory}`;
-                div.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="font-black text-sm uppercase">${t.unitId} <span class="text-[10px] text-gray-500 ml-2">(${t.unitType})</span></div>
-                        <button onclick="returnToScene(${t.id})" class="text-[9px] bg-gray-800 text-orange-400 font-bold px-2 py-1 rounded">UNDO</button>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <div class="text-[10px] text-gray-400 truncate max-w-[200px]">📍 ${t.destination} @ ${t.transportTime}</div>
-                        <div class="text-[9px] text-gray-600 italic">${t.onSceneDuration || '--'}</div>
-                    </div>
-                `;
-                transportLogEl.appendChild(div);
-            });
-            updateStats();
-        }
-
-        function updateStats() {
-            let pts = 0, red = 0, yellow = 0, green = 0, black = 0, ref = 0;
-            [...activeUnits, ...transportHistory].forEach(u => {
-                const count = u.patientCount || 0;
-                pts += count;
-                if(u.triageCategory === 'Red') red += count;
-                if(u.triageCategory === 'Yellow') yellow += count;
-                if(u.triageCategory === 'Green') green += count;
-                if(u.triageCategory === 'Black') black += count;
-                if(u.destination === 'PATIENT REFUSAL') ref += count;
-            });
-            document.getElementById('total-patients').innerText = pts;
-            document.getElementById('total-red').innerText = red;
-            document.getElementById('total-yellow').innerText = yellow;
-            document.getElementById('total-green').innerText = green;
-            document.getElementById('total-black').innerText = black;
-            document.getElementById('total-refusals').innerText = ref;
-        }
-
-        function openTransportModal(id) {
-            const unit = activeUnits.find(x => x.id === id);
-            if (!unit) return;
-            currentTransportId = id;
-            document.getElementById('modal-transport-unit-id').value = unit.unitId;
-            document.getElementById('modal-transport-unit-type').value = unit.unitType;
-            document.getElementById('modal-destination').value = "";
-            document.getElementById('modal-refusal').checked = false;
-            document.getElementById('modal-destination').disabled = false;
-            document.getElementById('modal-overlay').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            currentTransportId = null;
-        }
-
-        function confirmTransport() {
-            if (!currentTransportId) return;
-            const isRefusal = document.getElementById('modal-refusal').checked;
-            const dest = isRefusal ? "PATIENT REFUSAL" : document.getElementById('modal-destination').value;
-            const unitIdInput = document.getElementById('modal-transport-unit-id').value.trim();
-            const unitTypeInput = document.getElementById('modal-transport-unit-type').value;
-
-            if(!unitIdInput || (!dest && !isRefusal)) {
-                alert("Fill all details.");
-                return;
-            }
-
-            const idx = activeUnits.findIndex(u => u.id === currentTransportId);
-            if (idx !== -1) {
-                const unit = activeUnits.splice(idx, 1)[0];
-                const totalSec = Math.floor((Date.now() - unit.assignedTimestamp) / 1000);
-                unit.onSceneDuration = `${Math.floor(totalSec / 60)}m ${totalSec % 60}s`;
-                unit.unitId = unitIdInput.toUpperCase();
-                unit.unitType = unitTypeInput;
-                unit.destination = dest;
-                unit.transportTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                transportHistory.unshift(unit);
-                closeModal();
-                renderAll();
-            }
-        }
-
-        function exportToCSV() {
-            let csv = "Unit,Pts,Triage,Destination,Time,On-Scene Duration\n";
-            [...transportHistory, ...activeUnits].forEach(r => {
-                csv += `${r.unitId},${r.patientCount},${r.triageCategory},"${r.destination || 'ON SCENE'}",${r.transportTime || 'N/A'},${r.onSceneDuration || 'N/A'}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url); a.setAttribute('download', 'MedLog.csv');
-            a.click();
-        }
     </script>
 </body>
 </html>
